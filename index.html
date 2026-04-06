@@ -5,12 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#080E18">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQXVzdGluJ3MgVGVubmlzIiwic2hvcnRfbmFtZSI6IlRlbm5pcyIsInN0YXJ0X3VybCI6Ii4vIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzA4MEUxOCIsInRoZW1lX2NvbG9yIjoiIzA4MEUxOCJ9">
 <title>Austin's Tennis Scoring App</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-:root{--bg:#080E18;--card:#0D1520;--brd:rgba(255,255,255,0.05);--brd-a:rgba(212,225,87,0.25);--t1:#F1F5F9;--t2:#8899AB;--t3:#4A5E73;--ac:#D4E157;--acd:rgba(212,225,87,0.08);--acm:rgba(212,225,87,0.15);--red:#EF5350;--blue:#29B6F6}
+:root{--bg:#080E18;--card:#0D1520;--brd:rgba(255,255,255,0.05);--ba:rgba(212,225,87,0.25);--t1:#F1F5F9;--t2:#8899AB;--t3:#4A5E73;--ac:#D4E157;--acd:rgba(212,225,87,0.08);--acm:rgba(212,225,87,0.15);--red:#EF5350;--blue:#29B6F6}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{min-height:100vh;background:var(--bg);color:var(--t1);font-family:'Outfit',sans-serif;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
 body{background-image:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(212,225,87,.03) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(46,125,50,.04) 0%,transparent 50%)}
@@ -22,72 +23,69 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(212,225,87,
 .ts{font-size:10px;letter-spacing:5px;color:var(--t3);font-weight:700;margin-bottom:4px}
 .tm{font-size:26px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(135deg,#D4E157 20%,#F1F5F9 80%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .tbar{width:40px;height:2px;background:var(--ac);margin:8px auto 0;border-radius:2px;opacity:.5}
-.card{background:var(--card);border:1px solid var(--brd);border-radius:18px;overflow:hidden;box-shadow:0 4px 40px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.02) inset;animation:su .4s ease-out}
+.card{background:var(--card);border:1px solid var(--brd);border-radius:18px;overflow:hidden;box-shadow:0 4px 40px rgba(0,0,0,.4);animation:su .4s ease-out}
 .ld{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ac);margin-right:6px;vertical-align:middle;animation:lp 2s ease-in-out infinite}
-.sl{font-size:11px;letter-spacing:3px;color:var(--t3);font-weight:700}
-.st{font-size:11px;color:var(--t3);margin-left:8px;opacity:.6}
-.wb{display:inline-block;padding:6px 20px;border-radius:24px;background:linear-gradient(135deg,rgba(212,225,87,.12),rgba(212,225,87,.04));border:1px solid var(--brd-a);font-size:12px;font-weight:700;color:var(--ac);letter-spacing:2px;animation:su .4s ease-out}
+.wb{display:inline-block;padding:6px 20px;border-radius:24px;background:linear-gradient(135deg,rgba(212,225,87,.12),rgba(212,225,87,.04));border:1px solid var(--ba);font-size:12px;font-weight:700;color:var(--ac);letter-spacing:2px}
 .sh,.sr{display:grid;align-items:center;padding:0 20px;gap:4px}
 .sh{padding-top:12px;padding-bottom:8px;border-bottom:1px solid var(--brd)}
-.sr{padding-top:16px;padding-bottom:16px;border-bottom:1px solid var(--brd);transition:background .2s}
+.sr{padding-top:16px;padding-bottom:16px;border-bottom:1px solid var(--brd)}
 .sr:last-child{border-bottom:none}
 .sr.w{background:rgba(212,225,87,.04)}
 .pn{display:flex;align-items:center}
-.pn span{font-size:17px;font-weight:600;letter-spacing:.2px}
+.pn span{font-size:17px;font-weight:600}
 .pn.pw span{font-weight:800;color:var(--ac)}
-.svb{display:inline-flex;align-items:center;margin-right:6px;flex-shrink:0}
+.svb{display:inline-flex;align-items:center;margin-right:6px}
 .ss{text-align:center;font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600;color:var(--t3)}
 .ss.won{color:var(--t1);font-weight:700}.ss.cur{color:var(--t2)}
 .ss sup{font-size:10px;color:var(--t3);vertical-align:super;margin-left:1px}
 .pc{text-align:center;font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--ac);background:var(--acd);border-radius:10px;padding:6px 4px;min-width:52px}
-.sb{flex:1;padding:18px 12px;border:1px solid var(--brd-a);border-radius:14px;background:var(--acd);color:var(--ac);font-size:16px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;-webkit-user-select:none;user-select:none}
+.sb{flex:1;padding:18px 12px;border:1px solid var(--ba);border-radius:14px;background:var(--acd);color:var(--ac);font-size:16px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;-webkit-user-select:none}
 .sb:active{transform:scale(.96);background:var(--acm)}
 .sm{flex:1;padding:10px 12px;border:1px solid var(--brd);border-radius:10px;background:rgba(255,255,255,.02);color:var(--t3);font-size:12px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer}
 .sm:active{background:rgba(255,255,255,.05)}
 .sm.d{border-color:rgba(239,83,80,.2);color:var(--red)}
 .sm.b{border-color:rgba(41,182,246,.25);color:var(--blue)}
-.mt{padding:8px 22px;border:1px solid var(--brd);border-radius:24px;background:rgba(255,255,255,.02);color:var(--t3);font-size:12px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;letter-spacing:1.5px}
+.mt2{padding:8px 22px;border:1px solid var(--brd);border-radius:24px;background:rgba(255,255,255,.02);color:var(--t3);font-size:12px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;letter-spacing:1.5px}
 .go{width:100%;margin-top:28px;padding:16px 24px;border:none;border-radius:14px;background:linear-gradient(135deg,#D4E157,#9E9D24);color:#0A1628;font-size:16px;font-weight:800;font-family:'Outfit',sans-serif;cursor:pointer;letter-spacing:1.5px;text-transform:uppercase}
 .go:active{transform:scale(.97)}
 .go.warn{background:linear-gradient(135deg,#FFA726,#E65100)}
 .sc{padding:36px 28px 32px;animation:su .5s ease-out}
 .fl{display:block;font-size:11px;letter-spacing:2.5px;color:var(--t3);font-weight:700;margin-bottom:7px}
 .fi{width:100%;padding:13px 16px;border:1px solid var(--brd);border-radius:12px;background:rgba(255,255,255,.03);color:var(--t1);font-size:16px;font-family:'Outfit',sans-serif;outline:none}
-.fi:focus{border-color:var(--brd-a)}
+.fi:focus{border-color:var(--ba)}
 .fi::placeholder{color:var(--t3)}
 .pg{display:flex;gap:8px;margin-top:7px;flex-wrap:wrap}
 .pl{flex:1;min-width:50px;padding:11px 8px;border:1.5px solid var(--brd);border-radius:10px;background:rgba(255,255,255,.02);color:var(--t3);font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:center}
 .pl.a{border-color:var(--ac);background:var(--acd);color:var(--ac)}
 .sp{height:20px}
 .ov{position:fixed;inset:0;background:rgba(8,14,24,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:100;animation:fi .2s}
-.ob{background:var(--card);border:1px solid var(--brd);border-radius:18px;padding:28px 24px;max-width:380px;width:90%;text-align:center;box-shadow:0 8px 60px rgba(0,0,0,.5);max-height:85vh;overflow-y:auto}
+.ob{background:var(--card);border:1px solid var(--brd);border-radius:18px;padding:28px 24px;max-width:400px;width:90%;text-align:center;box-shadow:0 8px 60px rgba(0,0,0,.5);max-height:85vh;overflow-y:auto}
 .tg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}
 .tb2{padding:12px 8px;border-radius:10px;background:rgba(255,255,255,.03);font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:center}
 .tb2.ace{border:1px solid rgba(76,175,80,.4);color:#66BB6A}
+.tb2.urs{border:1px solid rgba(76,175,80,.3);color:#66BB6A}
 .tb2.df{border:1px solid rgba(239,83,80,.3);color:var(--red)}
 .tb2.wn{border:1px solid rgba(41,182,246,.3);color:var(--blue)}
 .tb2.er{border:1px solid rgba(255,167,38,.3);color:#FFA726}
-.tb2.sk{border:1px solid var(--brd-a);color:var(--ac)}
-.sts{margin-top:16px;text-align:left}
-.stt{font-size:11px;letter-spacing:2px;color:var(--ac);font-weight:700;margin-bottom:10px;text-transform:uppercase}
+.tb2.sk{border:1px solid var(--ba);color:var(--ac)}
 .stw{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--brd)}
 .stw:last-child{border-bottom:none}
 .stl{font-size:13px;color:var(--t2);flex:1;text-align:center}
 .stv{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;width:55px;text-align:center}
 .stv.p1{color:var(--ac)}.stv.p2{color:var(--blue)}
+.stt{font-size:11px;letter-spacing:2px;color:var(--ac);font-weight:700;margin:16px 0 10px;text-transform:uppercase}
 .hi{background:rgba(255,255,255,.02);border:1px solid var(--brd);border-radius:12px;padding:14px 16px;margin-bottom:10px;position:relative}
-.hi:active{background:rgba(255,255,255,.04)}
-.hm{font-size:11px;color:var(--t3);margin-top:4px}
 .db{position:absolute;right:12px;top:50%;transform:translateY(-50%);padding:6px 12px;border:1px solid rgba(239,83,80,.25);border-radius:8px;background:rgba(239,83,80,.08);color:var(--red);font-size:11px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer}
 .hidden{display:none!important}
 .flex{display:flex}.g10{gap:10px}.mt10{margin-top:10px}.mt22{margin-top:22px}.mt32{margin-top:32px}.tac{text-align:center}
 .mh{font-size:11px;color:var(--t3);margin-top:8px;opacity:.6}
 .scl{font-size:10px;letter-spacing:3px;color:var(--t3);font-weight:700;text-align:center;margin-bottom:10px}
 .tabs{display:flex;gap:0;border-radius:12px;overflow:hidden;border:1px solid var(--brd);margin-bottom:16px}
-.tab{flex:1;padding:10px 8px;background:rgba(255,255,255,.02);color:var(--t3);font-size:12px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;text-align:center;letter-spacing:1px;border:none}
+.tab{flex:1;padding:10px 4px;background:rgba(255,255,255,.02);color:var(--t3);font-size:10px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;text-align:center;letter-spacing:.3px;border:none}
 .tab.a{background:var(--acd);color:var(--ac)}
-.tr{display:flex;align-items:center;justify-content:space-between;padding:10px 4px}
-.trl{font-size:13px;color:var(--t2);font-weight:600}
+.tr{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.trl{font-size:14px;color:var(--t1);font-weight:600}
+.trd{font-size:11px;color:var(--t3);margin-top:2px}
 .tt{width:44px;height:24px;border-radius:12px;position:relative;cursor:pointer;border:none;flex-shrink:0}
 .tt.on{background:var(--ac)}.tt.off{background:rgba(255,255,255,.1)}
 .td{width:18px;height:18px;border-radius:50%;position:absolute;top:3px;transition:left .2s}
@@ -96,33 +94,82 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(212,225,87,
 .idle{padding:48px 24px;text-align:center}
 .scb{font-size:11px;color:var(--t2);margin-top:6px;text-align:center}
 .scbd{display:inline-block;width:6px;height:6px;border-radius:50%;background:#66BB6A;margin-right:5px;vertical-align:middle}
+.lbtn{padding:10px 12px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:rgba(255,255,255,.03);color:var(--t2);font-size:12px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:center;width:100%}
+.lbtn.act{background:var(--acd);color:var(--ac);border:1px solid var(--ba)}
+.pbp-item{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:flex-start;gap:10px}
+.pbp-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.pbp-score{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t3);margin-top:2px}
+.notif-banner{padding:14px 16px;background:rgba(212,225,87,.06);border:1px solid var(--ba);border-radius:12px;margin-bottom:16px;text-align:center;cursor:pointer}
+.notif-banner:active{background:rgba(212,225,87,.1)}
 </style>
 </head>
 <body>
 <div class="ctr" id="app"><div id="loading" class="tac" style="margin-top:80px"><div style="color:var(--t3);font-size:14px;letter-spacing:3px">LOADING...</div></div></div>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 <script>
-firebase.initializeApp({apiKey:"AIzaSyAP4pLIRiHIXGAR1AWVvRymd6yHnVmRV5Q",authDomain:"austin-tennis.firebaseapp.com",databaseURL:"https://austin-tennis-default-rtdb.firebaseio.com",projectId:"austin-tennis",storageBucket:"austin-tennis.firebasestorage.app",messagingSenderId:"652090047111",appId:"1:652090047111:web:b1795d9f47a70edbaa5622"});
-const db=firebase.database(),mRef=db.ref("match"),hRef=db.ref("history");
-const PL=["0","15","30","40"],TAGS=["Ace","Double fault","FH winner","BH winner","Volley winner","Overhead winner","Unforced error","Forced error","No tag"];
-const TC={"Ace":"ace","Double fault":"df","FH winner":"wn","BH winner":"wn","Volley winner":"wn","Overhead winner":"wn","Unforced error":"er","Forced error":"er","No tag":"sk"};
+const fbConfig={apiKey:"AIzaSyAP4pLIRiHIXGAR1AWVvRymd6yHnVmRV5Q",authDomain:"austin-tennis.firebaseapp.com",databaseURL:"https://austin-tennis-default-rtdb.firebaseio.com",projectId:"austin-tennis",storageBucket:"austin-tennis.firebasestorage.app",messagingSenderId:"652090047111",appId:"1:652090047111:web:b1795d9f47a70edbaa5622"};
+firebase.initializeApp(fbConfig);
+const db=firebase.database(),mRef=db.ref("match"),hRef=db.ref("history"),sRef=db.ref("settings"),tokRef=db.ref("notifTokens");
+let messaging=null;
+try{messaging=firebase.messaging()}catch(e){console.log("Messaging not supported")}
+
+const VAPID_KEY="BJQvLm_-T8KLwHZdZQu3aV0_FwKKsmybA4lh8jopn6kMHWOA4dMQfXGQqNXIlvmmZnQQv0jFhRQ0WoF3Ul_H8LM";
+const PL=["0","15","30","40"];
+const TAGS=["Ace","Unreturned serve","Double fault","FH winner","BH winner","Volley winner","Overhead winner","Dropshot winner","Unforced error","Forced error","No tag"];
+const TC={"Ace":"ace","Unreturned serve":"urs","Double fault":"df","FH winner":"wn","BH winner":"wn","Volley winner":"wn","Overhead winner":"wn","Dropshot winner":"wn","Unforced error":"er","Forced error":"er","No tag":"sk"};
 const HB_INT=10000,HB_TO=35000;
 const myId="s_"+Math.random().toString(36).slice(2,10);
 
-const DEF={player1:"Austin",player2:"Opponent",sets:[{games:[0,0],tiebreak:false,tiebreakPoints:[0,0]}],currentGame:[0,0],serving:0,matchFormat:3,gamesPerSet:6,thirdSetFormat:"regular",noAd:false,matchOver:false,winner:null,lastUpdated:null,matchStarted:false,matchStartTime:null,pointLog:[],stateHistory:[],activeScorer:null,scorerHeartbeat:null,scorerId:null};
+const DEF={player1:"Austin",player2:"Opponent",sets:[{games:[0,0],tiebreak:false,tiebreakPoints:[0,0]}],currentGame:[0,0],serving:0,matchFormat:3,gamesPerSet:6,thirdSetFormat:"regular",noAd:false,matchOver:false,winner:null,lastUpdated:null,matchStarted:false,matchStartTime:null,pointLog:[],stateHistory:[],activeScorer:null,scorerHeartbeat:null,scorerId:null,location:"",indoor:true,weather:null};
+const DEF_SETTINGS={alertGame:false,alertSet:true,alertMatch:true};
 
 let S=JSON.parse(JSON.stringify(DEF));
+let settings=JSON.parse(JSON.stringify(DEF_SETTINGS));
 let isAdmin=false,showSetup=true,confirmReset=false,confirmFinalize=false,confirmDeleteKey=null;
 let pendingPoint=null,viewTab="live",tagsEnabled=true,scorerName="";
-let mHist=[],hKeys=[],viewHist=null,hbTimer=null,timerInt=null;
+let mHist=[],viewHist=null,hbTimer=null,timerInt=null;
 let showNamePrompt=false,showScorerWarn=false;
+let notifEnabled=false,notifToken=null;
+let weatherData=null,locMode="gps",searchQuery="",searchResults=[],gpsLoading=false;
+
+// ── Notifications ──
+async function requestNotifPermission(){
+  if(!messaging)return;
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm==="granted"){
+      const reg=await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+      const token=await messaging.getToken({vapidKey:VAPID_KEY,serviceWorkerRegistration:reg});
+      if(token){notifToken=token;notifEnabled=true;tokRef.child(token.slice(0,20)).set({token:token,ts:new Date().toISOString()});render()}
+    }
+  }catch(e){console.log("Notif error:",e)}
+}
+
+function sendNotification(title,body){
+  if(!notifEnabled)return;
+  // Send to all registered tokens via Firebase function or direct
+  // For client-side, we write to a "notifications" node that triggers
+  db.ref("notifications").push({title:title,body:body,ts:new Date().toISOString()});
+  // Also show local notification if page is visible
+  if(document.visibilityState==='visible'&&Notification.permission==='granted'){
+    new Notification(title,{body:body,icon:'🎾',tag:'tennis-'+Date.now()});
+  }
+}
+
+// Foreground messages
+if(messaging){messaging.onMessage((payload)=>{
+  const d=payload.data||payload.notification||{};
+  if(Notification.permission==='granted'){new Notification(d.title||"Austin's Tennis",{body:d.body||"Score update!",tag:'tennis-fg'})}
+})}
 
 function save(ns){S=ns;mRef.set(ns);render()}
 function snap(){const c=JSON.parse(JSON.stringify(S));delete c.stateHistory;if(!S.stateHistory)S.stateHistory=[];S.stateHistory.push(c);if(S.stateHistory.length>200)S.stateHistory.shift()}
 
 mRef.on("value",s=>{const v=s.val();if(v){S=v;if(!S.sets)S.sets=[{games:[0,0],tiebreak:false,tiebreakPoints:[0,0]}];if(!S.pointLog)S.pointLog=[];if(!S.stateHistory)S.stateHistory=[];if(S.matchStarted)showSetup=false}document.getElementById("loading").classList.add("hidden");startTimer();render()});
-hRef.on("value",s=>{const v=s.val();if(v){hKeys=Object.keys(v);const entries=Object.entries(v).map(([k,val])=>({_key:k,...val}));mHist=entries.sort((a,b)=>(b.date||"").localeCompare(a.date||""))}else{hKeys=[];mHist=[]}render()});
+hRef.on("value",s=>{const v=s.val();if(v){mHist=Object.entries(v).map(([k,val])=>({_key:k,...val})).sort((a,b)=>(b.date||"").localeCompare(a.date||""))}else{mHist=[]}render()});
+sRef.on("value",s=>{const v=s.val();if(v)settings={...DEF_SETTINGS,...v};render()});
 
 function startTimer(){clearInterval(timerInt);if(S.matchStarted&&!S.matchOver&&S.matchStartTime){timerInt=setInterval(()=>{const el=document.getElementById("mtimer");if(el)el.textContent=getEl()},1000)}}
 function getEl(){if(!S.matchStartTime)return"0:00";const d=Math.floor((Date.now()-new Date(S.matchStartTime).getTime())/1000),m=Math.floor(d/60),s=d%60;return m+":"+(s<10?"0":"")+s}
@@ -131,19 +178,37 @@ function csw(s,g){const[a,b]=s.games;if(a>=g&&a-b>=2)return 0;if(b>=g&&b-a>=2)re
 function cs(){return S.sets[S.sets.length-1]}
 function isSTB(n){return n.matchFormat===3&&n.sets.length===3&&n.thirdSetFormat==="supertb"&&n.sets[2].tiebreak}
 function scorerActive(){if(!S.activeScorer||!S.scorerHeartbeat)return false;return(Date.now()-new Date(S.scorerHeartbeat).getTime())<HB_TO}
-function isMe(){return S.scorerId===myId}
 
-function startHB(){clearInterval(hbTimer);if(!isAdmin)return;const beat=()=>{S.activeScorer=scorerName||"Scorer";S.scorerHeartbeat=new Date().toISOString();S.scorerId=myId;mRef.update({activeScorer:S.activeScorer,scorerHeartbeat:S.scorerHeartbeat,scorerId:S.scorerId})};beat();hbTimer=setInterval(beat,HB_INT)}
+function startHB(){clearInterval(hbTimer);if(!isAdmin)return;const beat=()=>{mRef.update({activeScorer:scorerName||"Scorer",scorerHeartbeat:new Date().toISOString(),scorerId:myId})};beat();hbTimer=setInterval(beat,HB_INT)}
 function stopHB(){clearInterval(hbTimer);mRef.update({activeScorer:null,scorerHeartbeat:null,scorerId:null})}
+
+function getTagsFor(pi){const sv=S.serving===pi;if(sv)return TAGS.filter(t=>t!=="Double fault");return TAGS.filter(t=>t!=="Ace"&&t!=="Unreturned serve")}
+
+// Score string for play-by-play
+function getScoreAtPoint(ns,setIdx){
+  const c=ns.sets[ns.sets.length-1];
+  const setsStr=ns.sets.map(s=>s.games[0]+"-"+s.games[1]).join(", ");
+  if(c.tiebreak){return setsStr+" (TB: "+c.tiebreakPoints[0]+"-"+c.tiebreakPoints[1]+")";}
+  const g0=PL[ns.currentGame[0]]||ns.currentGame[0];
+  const g1=PL[ns.currentGame[1]]||ns.currentGame[1];
+  let gamePts=g0+"-"+g1;
+  if(ns.currentGame[0]>=3&&ns.currentGame[1]>=3){
+    if(ns.currentGame[0]===ns.currentGame[1])gamePts="Deuce";
+    else if(ns.currentGame[0]===4)gamePts="Ad-"+ns.player1;
+    else if(ns.currentGame[1]===4)gamePts="Ad-"+ns.player2;
+  }
+  return setsStr+" ("+gamePts+")";
+}
 
 function bsp(pi){if(S.matchOver)return;if(tagsEnabled){pendingPoint={player:pi};render();return}dsp(pi,"No tag")}
 function csp(tag){if(!pendingPoint)return;dsp(pendingPoint.player,tag);pendingPoint=null}
-function getTagsFor(pi){const isServing=S.serving===pi;if(isServing)return TAGS.filter(t=>t!=="Double fault");return TAGS.filter(t=>t!=="Ace")}
 
 function dsp(pi,tag){
   snap();const ns=JSON.parse(JSON.stringify(S));const c=ns.sets[ns.sets.length-1];
   if(!ns.pointLog)ns.pointLog=[];
-  ns.pointLog.push({player:pi,tag:tag,set:ns.sets.length-1,serving:ns.serving,onServe:ns.serving===pi});
+  const scoreSnap=getScoreAtPoint(ns);
+  ns.pointLog.push({player:pi,tag:tag,set:ns.sets.length-1,serving:ns.serving,onServe:ns.serving===pi,timestamp:new Date().toISOString(),score:scoreSnap});
+
   if(isSTB(ns)){c.tiebreakPoints[pi]++;const[a,b]=c.tiebreakPoints;const t=a+b;if(t===1||(t>1&&(t-1)%2===0))ns.serving=ns.serving===0?1:0;if(a>=10&&a-b>=2){c.games[0]=1;c.games[1]=0;fset(ns)}else if(b>=10&&b-a>=2){c.games[0]=0;c.games[1]=1;fset(ns)}else{ns.lastUpdated=new Date().toISOString();save(ns)}return}
   if(c.tiebreak){c.tiebreakPoints[pi]++;const[a,b]=c.tiebreakPoints;const t=a+b;if(t===1||(t>1&&(t-1)%2===0))ns.serving=ns.serving===0?1:0;if(a>=7&&a-b>=2){c.games[0]=ns.gamesPerSet+1;c.games[1]=ns.gamesPerSet;fset(ns)}else if(b>=7&&b-a>=2){c.games[0]=ns.gamesPerSet;c.games[1]=ns.gamesPerSet+1;fset(ns)}else{ns.lastUpdated=new Date().toISOString();save(ns)}return}
   const[a,b]=ns.currentGame;
@@ -152,9 +217,23 @@ function dsp(pi,tag){
   ns.lastUpdated=new Date().toISOString();save(ns);
 }
 
-function wg(ns,pi){const c=ns.sets[ns.sets.length-1];c.games[pi]++;ns.currentGame=[0,0];ns.serving=ns.serving===0?1:0;if(c.games[0]===ns.gamesPerSet&&c.games[1]===ns.gamesPerSet){c.tiebreak=true;c.tiebreakPoints=[0,0];ns.lastUpdated=new Date().toISOString();save(ns);return}if(csw(c,ns.gamesPerSet)>=0)fset(ns);else{ns.lastUpdated=new Date().toISOString();save(ns)}}
+function wg(ns,pi){
+  const c=ns.sets[ns.sets.length-1];c.games[pi]++;ns.currentGame=[0,0];ns.serving=ns.serving===0?1:0;
+  if(c.games[0]===ns.gamesPerSet&&c.games[1]===ns.gamesPerSet){c.tiebreak=true;c.tiebreakPoints=[0,0];ns.lastUpdated=new Date().toISOString();if(settings.alertGame)sendNotification("🎾 Game - Tiebreak",ns.player1+" vs "+ns.player2+": "+ns.sets.map(s=>s.games[0]+"-"+s.games[1]).join(", "));save(ns);return}
+  if(csw(c,ns.gamesPerSet)>=0){fset(ns)}
+  else{ns.lastUpdated=new Date().toISOString();if(settings.alertGame){const scores=ns.sets.map(s=>s.games[0]+"-"+s.games[1]).join(", ");sendNotification("🎾 Game Update",ns.player1+" vs "+ns.player2+": "+scores)}save(ns)}
+}
 
-function fset(ns){const nd=Math.ceil(ns.matchFormat/2);let w=[0,0];ns.sets.forEach((s,i)=>{if(i===2&&ns.thirdSetFormat==="supertb"&&s.tiebreak){if(s.games[0]>s.games[1])w[0]++;else if(s.games[1]>s.games[0])w[1]++}else{const r=csw(s,ns.gamesPerSet);if(r>=0)w[r]++}});if(w[0]>=nd){ns.matchOver=true;ns.winner=0}else if(w[1]>=nd){ns.matchOver=true;ns.winner=1}else{if(ns.matchFormat===3&&ns.sets.length===2&&ns.thirdSetFormat==="supertb")ns.sets.push({games:[0,0],tiebreak:true,tiebreakPoints:[0,0]});else ns.sets.push({games:[0,0],tiebreak:false,tiebreakPoints:[0,0]})}ns.currentGame=[0,0];ns.lastUpdated=new Date().toISOString();save(ns)}
+function fset(ns){
+  const nd=Math.ceil(ns.matchFormat/2);let w=[0,0];
+  ns.sets.forEach((s,i)=>{if(i===2&&ns.thirdSetFormat==="supertb"&&s.tiebreak){if(s.games[0]>s.games[1])w[0]++;else if(s.games[1]>s.games[0])w[1]++}else{const r=csw(s,ns.gamesPerSet);if(r>=0)w[r]++}});
+  const scores=ns.sets.map(s=>s.games[0]+"-"+s.games[1]).join(", ");
+  const loc=S.location?" @ "+S.location:"";
+  if(w[0]>=nd){ns.matchOver=true;ns.winner=0;if(settings.alertMatch)sendNotification("🏆 Match Over!",ns.player1+" defeats "+ns.player2+": "+scores+loc)}
+  else if(w[1]>=nd){ns.matchOver=true;ns.winner=1;if(settings.alertMatch)sendNotification("🏆 Match Over!",ns.player2+" defeats "+ns.player1+": "+scores+loc)}
+  else{if(settings.alertSet)sendNotification("🎾 Set Complete",ns.player1+" vs "+ns.player2+": "+scores+loc);if(ns.matchFormat===3&&ns.sets.length===2&&ns.thirdSetFormat==="supertb")ns.sets.push({games:[0,0],tiebreak:true,tiebreakPoints:[0,0]});else ns.sets.push({games:[0,0],tiebreak:false,tiebreakPoints:[0,0]})}
+  ns.currentGame=[0,0];ns.lastUpdated=new Date().toISOString();save(ns)
+}
 
 function gs(pi){const c=cs();if(c.tiebreak)return c.tiebreakPoints[pi].toString();const p=S.currentGame[pi],o=S.currentGame[pi===0?1:0];if(p>=3&&o>=3){if(S.noAd)return"40";if(p===o)return"40";return p>o?"AD":"–"}return PL[p]||p.toString()}
 function sw(){const ns=JSON.parse(JSON.stringify(S));ns.serving=ns.serving===0?1:0;ns.lastUpdated=new Date().toISOString();save(ns)}
@@ -162,63 +241,104 @@ function undo(){if(!S.stateHistory||!S.stateHistory.length)return;const p=S.stat
 function ft(i){if(!i)return"";return new Date(i).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}
 function fd(i){if(!i)return"";return new Date(i).toLocaleDateString([],{month:"short",day:"numeric",year:"numeric"})}
 
-function handleToggle(){
-  if(!isAdmin){
-    if(scorerActive()&&!isMe()){showScorerWarn=true;render()}
-    else{showNamePrompt=true;render()}
-  }else{stopHB();isAdmin=false;render()}
-}
+function handleToggle(){if(!isAdmin){if(scorerActive()&&S.scorerId!==myId){showScorerWarn=true;render()}else{showNamePrompt=true;render()}}else{stopHB();isAdmin=false;render()}}
 function enterScorer(name){scorerName=name;isAdmin=true;showNamePrompt=false;showScorerWarn=false;if(!S.matchStarted)showSetup=true;startHB();render()}
-function startMatch(){S.matchStarted=true;S.lastUpdated=new Date().toISOString();S.matchStartTime=new Date().toISOString();S.pointLog=[];S.stateHistory=[];showSetup=false;save(S)}
-function doReset(){const f=JSON.parse(JSON.stringify(DEF));f.player1=S.player1;f.player2=S.player2;f.matchFormat=S.matchFormat;f.gamesPerSet=S.gamesPerSet;f.thirdSetFormat=S.thirdSetFormat;f.noAd=S.noAd;f.activeScorer=S.activeScorer;f.scorerHeartbeat=S.scorerHeartbeat;f.scorerId=S.scorerId;showSetup=true;confirmReset=false;confirmFinalize=false;save(f)}
-function doFinalize(){if(!S.matchOver)return;hRef.push({player1:S.player1,player2:S.player2,winner:S.winner,sets:S.sets,gamesPerSet:S.gamesPerSet,matchFormat:S.matchFormat,thirdSetFormat:S.thirdSetFormat,noAd:S.noAd,pointLog:S.pointLog||[],date:new Date().toISOString(),matchDuration:getEl()});doReset()}
-function delByIdx(idx){if(!mHist[idx])return;const key=mHist[idx]._key;if(key){confirmDeleteKey=key;render()}}
+function startMatch(){S.matchStarted=true;S.lastUpdated=new Date().toISOString();S.matchStartTime=new Date().toISOString();S.pointLog=[];S.stateHistory=[];S.weather=weatherData;showSetup=false;if(settings.alertMatch)sendNotification("🎾 Match Started!",S.player1+" vs "+S.player2+(S.location?" @ "+S.location:""));save(S)}
+function doReset(){const f=JSON.parse(JSON.stringify(DEF));f.player1=S.player1;f.player2=S.player2;f.matchFormat=S.matchFormat;f.gamesPerSet=S.gamesPerSet;f.thirdSetFormat=S.thirdSetFormat;f.noAd=S.noAd;f.location=S.location;f.indoor=S.indoor;f.activeScorer=S.activeScorer;f.scorerHeartbeat=S.scorerHeartbeat;f.scorerId=S.scorerId;showSetup=true;confirmReset=false;confirmFinalize=false;save(f)}
+function doFinalize(){if(!S.matchOver)return;hRef.push({player1:S.player1,player2:S.player2,winner:S.winner,sets:S.sets,gamesPerSet:S.gamesPerSet,matchFormat:S.matchFormat,thirdSetFormat:S.thirdSetFormat,noAd:S.noAd,pointLog:S.pointLog||[],date:new Date().toISOString(),matchDuration:getEl(),location:S.location,indoor:S.indoor,weather:S.weather});doReset()}
+function delByIdx(idx){if(!mHist[idx])return;confirmDeleteKey=mHist[idx]._key;render()}
 function doDel(){if(!confirmDeleteKey)return;hRef.child(confirmDeleteKey).remove();confirmDeleteKey=null;render()}
+function saveSettings(){sRef.set(settings);render()}
 
-async function exportStats(){const el=document.getElementById("sxa");if(!el)return;try{const c=await html2canvas(el,{backgroundColor:'#0D1520',scale:2});const l=document.createElement('a');l.download='match-stats.png';l.href=c.toDataURL();l.click()}catch(e){alert('Export failed.')}}
+// Location
+async function fetchWeather(q){if(!q)return;try{const r=await fetch("https://wttr.in/"+encodeURIComponent(q)+"?format=j1");const d=await r.json();const c=d.current_condition?.[0];if(c)weatherData={temp:c.temp_F+"°F",desc:c.weatherDesc?.[0]?.value||""}}catch(e){weatherData=null}render()}
+function useGPS(){if(!navigator.geolocation)return;gpsLoading=true;render();navigator.geolocation.getCurrentPosition(async(pos)=>{const{latitude:la,longitude:lo}=pos.coords;try{const r=await fetch("https://nominatim.openstreetmap.org/reverse?lat="+la+"&lon="+lo+"&format=json");const d=await r.json();const nm=d.address?.leisure||d.address?.amenity||d.address?.building||"";const ct=d.address?.city||d.address?.town||d.address?.village||"";S.location=nm?nm+", "+ct:d.display_name?.split(",").slice(0,3).join(",")||la.toFixed(4)+", "+lo.toFixed(4)}catch(e){S.location=la.toFixed(4)+", "+lo.toFixed(4)}gpsLoading=false;locMode="manual";if(!S.indoor)fetchWeather(la+","+lo);else render()},()=>{gpsLoading=false;render()},{enableHighAccuracy:true,timeout:10000})}
+async function searchVenue(){if(!searchQuery.trim())return;try{const r=await fetch("https://nominatim.openstreetmap.org/search?q="+encodeURIComponent(searchQuery)+"&format=json&limit=5");const d=await r.json();searchResults=d.map(r=>({name:r.display_name.split(",").slice(0,3).join(","),lat:r.lat,lon:r.lon}))}catch(e){searchResults=[]}render()}
+function pickResult(r){S.location=r.name;searchResults=[];searchQuery="";locMode="manual";if(!S.indoor)fetchWeather(r.lat+","+r.lon);else render()}
 
-function cst(log){if(!log||!log.length)return null;const s={p1:{aces:0,df:0,fhw:0,bhw:0,vw:0,ohw:0,ue:0,fe:0,sw:0,st:0,rw:0,rt:0,tp:0},p2:{aces:0,df:0,fhw:0,bhw:0,vw:0,ohw:0,ue:0,fe:0,sw:0,st:0,rw:0,rt:0,tp:0}};log.forEach(pt=>{const pk=pt.player===0?"p1":"p2",ok=pt.player===0?"p2":"p1";s[pk].tp++;if(pt.tag==="Ace")s[pk].aces++;if(pt.tag==="Double fault")s[ok].df++;if(pt.tag==="FH winner")s[pk].fhw++;if(pt.tag==="BH winner")s[pk].bhw++;if(pt.tag==="Volley winner")s[pk].vw++;if(pt.tag==="Overhead winner")s[pk].ohw++;if(pt.tag==="Unforced error")s[ok].ue++;if(pt.tag==="Forced error")s[ok].fe++;if(pt.serving===pt.player){s[pk].st++;s[pk].sw++;s[ok].rt++}else{s[pk].rt++;s[pk].rw++;s[ok].st++}});return s}
+function cst(log){if(!log||!log.length)return null;const s={p1:{aces:0,urs:0,df:0,fhw:0,bhw:0,vw:0,ohw:0,dsw:0,ue:0,fe:0,sw:0,st:0,rw:0,rt:0,tp:0},p2:{aces:0,urs:0,df:0,fhw:0,bhw:0,vw:0,ohw:0,dsw:0,ue:0,fe:0,sw:0,st:0,rw:0,rt:0,tp:0}};log.forEach(pt=>{const pk=pt.player===0?"p1":"p2",ok=pt.player===0?"p2":"p1";s[pk].tp++;if(pt.tag==="Ace")s[pk].aces++;if(pt.tag==="Unreturned serve")s[pk].urs++;if(pt.tag==="Double fault")s[ok].df++;if(pt.tag==="FH winner")s[pk].fhw++;if(pt.tag==="BH winner")s[pk].bhw++;if(pt.tag==="Volley winner")s[pk].vw++;if(pt.tag==="Overhead winner")s[pk].ohw++;if(pt.tag==="Dropshot winner")s[pk].dsw++;if(pt.tag==="Unforced error")s[ok].ue++;if(pt.tag==="Forced error")s[ok].fe++;if(pt.serving===pt.player){s[pk].st++;s[pk].sw++;s[ok].rt++}else{s[pk].rt++;s[pk].rw++;s[ok].st++}});return s}
 function pct(n,d){return d===0?"0%":Math.round(n/d*100)+"%"}
 function sR(l,v1,v2){return`<div class="stw"><div class="stv p1">${v1}</div><div class="stl">${l}</div><div class="stv p2">${v2}</div></div>`}
-function rStats(log,p1,p2){const s=cst(log);if(!s)return'<div style="color:var(--t3);font-size:13px;padding:12px">No point data.</div>';const tw=p=>p.fhw+p.bhw+p.vw+p.ohw+p.aces;return`<div class="stw" style="padding:4px 0 8px;border-bottom:1px solid var(--brd)"><div class="stv p1" style="font-size:12px;font-weight:700">${e(p1)}</div><div class="stl"></div><div class="stv p2" style="font-size:12px;font-weight:700">${e(p2)}</div></div><div class="sts"><div class="stt">Serve</div>${sR("Aces",s.p1.aces,s.p2.aces)}${sR("Double Faults",s.p1.df,s.p2.df)}${sR("Pts Won on Serve",s.p1.sw?s.p1.sw+" ("+pct(s.p1.sw,s.p1.st)+")":"0",s.p2.sw?s.p2.sw+" ("+pct(s.p2.sw,s.p2.st)+")":"0")}${sR("Pts Won on Return",s.p1.rw?s.p1.rw+" ("+pct(s.p1.rw,s.p1.rt)+")":"0",s.p2.rw?s.p2.rw+" ("+pct(s.p2.rw,s.p2.rt)+")":"0")}</div><div class="sts"><div class="stt">Winners</div>${sR("Forehand",s.p1.fhw,s.p2.fhw)}${sR("Backhand",s.p1.bhw,s.p2.bhw)}${sR("Volley",s.p1.vw,s.p2.vw)}${sR("Overhead",s.p1.ohw,s.p2.ohw)}${sR("Total Winners",tw(s.p1),tw(s.p2))}</div><div class="sts"><div class="stt">Errors</div>${sR("Unforced Errors",s.p1.ue,s.p2.ue)}${sR("Forced Errors",s.p1.fe,s.p2.fe)}</div><div class="sts"><div class="stt">Total</div>${sR("Points Won",s.p1.tp,s.p2.tp)}</div>`}
+function rStats(log,p1,p2){const s=cst(log);if(!s)return'<div style="color:var(--t3);font-size:13px;padding:12px">No point data.</div>';const tw=p=>p.fhw+p.bhw+p.vw+p.ohw+p.dsw+p.aces+p.urs;return`<div class="stw" style="padding:4px 0 8px;border-bottom:1px solid var(--brd)"><div class="stv p1" style="font-size:12px;font-weight:700">${e(p1)}</div><div class="stl"></div><div class="stv p2" style="font-size:12px;font-weight:700">${e(p2)}</div></div><div class="stt">Serve</div>${sR("Aces",s.p1.aces,s.p2.aces)}${sR("Unreturned Serves",s.p1.urs,s.p2.urs)}${sR("Double Faults",s.p1.df,s.p2.df)}${sR("Pts Won on Serve",s.p1.sw?s.p1.sw+" ("+pct(s.p1.sw,s.p1.st)+")":"0",s.p2.sw?s.p2.sw+" ("+pct(s.p2.sw,s.p2.st)+")":"0")}${sR("Pts Won on Return",s.p1.rw?s.p1.rw+" ("+pct(s.p1.rw,s.p1.rt)+")":"0",s.p2.rw?s.p2.rw+" ("+pct(s.p2.rw,s.p2.rt)+")":"0")}<div class="stt">Winners</div>${sR("Forehand",s.p1.fhw,s.p2.fhw)}${sR("Backhand",s.p1.bhw,s.p2.bhw)}${sR("Volley",s.p1.vw,s.p2.vw)}${sR("Overhead",s.p1.ohw,s.p2.ohw)}${sR("Dropshot",s.p1.dsw,s.p2.dsw)}${sR("Total Winners",tw(s.p1),tw(s.p2))}<div class="stt">Errors</div>${sR("Unforced Errors",s.p1.ue,s.p2.ue)}${sR("Forced Errors",s.p1.fe,s.p2.fe)}<div class="stt">Total</div>${sR("Points Won",s.p1.tp,s.p2.tp)}`}
+
+function rPBP(log,p1,p2){
+  if(!log||!log.length)return'<div style="color:var(--t3);font-size:13px;padding:12px">No points played yet.</div>';
+  return[...log].reverse().map(pt=>{
+    const w=pt.player===0?p1:p2;const tl=pt.tag==="No tag"?"":` — ${pt.tag}`;const cl=pt.player===0?"var(--ac)":"var(--blue)";
+    const sc=pt.score||"";
+    return`<div class="pbp-item"><div class="pbp-dot" style="background:${cl}"></div><div style="flex:1"><div style="font-size:13px;color:var(--t1);font-weight:600">${e(w)} wins point${tl}</div><div class="pbp-score">${e(sc)} · S${(pt.set||0)+1} · ${ft(pt.timestamp)}</div></div></div>`}).join('')}
 
 const SVB=`<span class="svb"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#D4E157"/><path d="M3.5 3C5.8 5.5 5.8 10.5 3.5 13" stroke="#9E9D24" stroke-width=".9" fill="none"/><path d="M12.5 3C10.2 5.5 10.2 10.5 12.5 13" stroke="#9E9D24" stroke-width=".9" fill="none"/></svg></span>`;
-function e(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function e(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
 function scorerBadge(){if(!scorerActive())return'';return`<div class="scb"><span class="scbd"></span>Scored by <strong style="color:var(--ac)">${e(S.activeScorer)}</strong></div>`}
-function modeToggle(){const label=isAdmin?'SWITCH TO VIEWER':'SWITCH TO SCORER';const hint=isAdmin?`Scoring as ${e(scorerName||'Scorer')}`:'Scores update in real-time';return`<div class="mt32 tac"><button class="mt" onclick="handleToggle()">${label}</button><div class="mh">${hint}</div>${!isAdmin?scorerBadge():''}</div>`}
-function titleHtml(){return`<div class="tb"><div class="ts">AUSTIN'S</div><div class="tm">Tennis Scoring App</div><div class="tbar"></div></div>`}
-function tabsHtml(){return`<div class="tabs"><button class="tab ${viewTab==='live'?'a':''}" onclick="viewTab='live';render()">LIVE MATCH</button><button class="tab ${viewTab==='history'?'a':''}" onclick="viewTab='history';render()">MATCH HISTORY</button></div>`}
+function modeToggle(){return`<div class="mt32 tac"><button class="mt2" onclick="handleToggle()">${isAdmin?'SWITCH TO VIEWER':'SWITCH TO SCORER'}</button><div class="mh">${isAdmin?"Scoring as "+e(scorerName||'Scorer'):"Scores update in real-time"}</div>${!isAdmin?scorerBadge():''}</div>`}
+function titleH(){return`<div class="tb"><div class="ts">AUSTIN'S</div><div class="tm">Tennis Scoring App</div><div class="tbar"></div></div>`}
+function tabsH(){return`<div class="tabs"><button class="tab ${viewTab==='live'?'a':''}" onclick="viewTab='live';render()">LIVE</button><button class="tab ${viewTab==='pbp'?'a':''}" onclick="viewTab='pbp';render()">PLAY-BY-PLAY</button><button class="tab ${viewTab==='stats'?'a':''}" onclick="viewTab='stats';render()">STATS</button><button class="tab ${viewTab==='history'?'a':''}" onclick="viewTab='history';render()">HISTORY</button><button class="tab ${viewTab==='settings'?'a':''}" onclick="viewTab='settings';render()">⚙️</button></div>`}
 
 function histList(){
   if(!mHist.length)return`<div class="card mt22" style="padding:24px;text-align:center;color:var(--t3);font-size:14px">No past matches saved yet.</div>`;
   let h='';mHist.forEach((m,i)=>{const wN=m.winner===0?m.player1:m.player2;
-    h+=`<div class="hi"><div onclick="viewHist=mHist[${i}];render()" style="cursor:pointer;${isAdmin?'padding-right:70px':''}"><div style="font-size:15px;font-weight:600">${e(m.player1)} vs ${e(m.player2)}</div><div style="font-size:13px;color:var(--ac);margin-top:2px">🏆 ${e(wN)} · ${(m.sets||[]).map(s=>`<span style="font-family:'JetBrains Mono',monospace;margin:0 3px">${s.games[0]}-${s.games[1]}</span>`).join('')}</div><div class="hm">${fd(m.date)} · ${m.noAd?'No-Ad':'Ad'} · ${m.gamesPerSet||6}g${m.matchDuration?' · '+m.matchDuration:''}</div></div>${isAdmin?`<button class="db" onclick="event.stopPropagation();delByIdx(${i})">DELETE</button>`:''}</div>`});
+    h+=`<div class="hi"><div onclick="viewHist=mHist[${i}];render()" style="cursor:pointer;${isAdmin?'padding-right:70px':''}"><div style="font-size:15px;font-weight:600">${e(m.player1)} vs ${e(m.player2)}</div><div style="font-size:13px;color:var(--ac);margin-top:2px">🏆 ${e(wN)} · ${(m.sets||[]).map(s=>`<span style="font-family:'JetBrains Mono',monospace;margin:0 3px">${s.games[0]}-${s.games[1]}</span>`).join('')}</div><div style="font-size:11px;color:var(--t3);margin-top:4px">${fd(m.date)}${m.matchDuration?' · '+m.matchDuration:''}${m.location?' · 📍'+e(m.location):''}${m.indoor===false&&m.weather?' · '+m.weather.temp:''}</div></div>${isAdmin?`<button class="db" onclick="event.stopPropagation();delByIdx(${i})">DELETE</button>`:''}</div>`});
   return`<div class="mt22">${h}</div>`}
+
+function settingsTab(){
+  return`<div class="card" style="padding:24px 20px">
+    <div class="tac" style="margin-bottom:20px;font-size:13px;letter-spacing:2px;color:var(--ac);font-weight:700">⚙️ SETTINGS</div>
+    ${!notifEnabled?`<div class="notif-banner" onclick="requestNotifPermission()"><div style="font-size:14px;font-weight:700;color:var(--ac);margin-bottom:4px">🔔 Enable Push Notifications</div><div style="font-size:12px;color:var(--t3)">Get alerts for game, set, and match updates</div></div>`:`<div style="padding:10px 14px;background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.25);border-radius:10px;margin-bottom:16px;font-size:13px;color:#66BB6A;font-weight:600;text-align:center">🔔 Notifications enabled</div>`}
+    <div style="font-size:12px;color:var(--t3);margin-bottom:12px;letter-spacing:1px;font-weight:700">ALERT TYPES</div>
+    <div class="tr"><div><div class="trl">🎾 Game alerts</div><div class="trd">Notify after every game</div></div><button class="tt ${settings.alertGame?'on':'off'}" onclick="settings.alertGame=!settings.alertGame;saveSettings()"><div class="td ${settings.alertGame?'on':'off'}"></div></button></div>
+    <div class="tr"><div><div class="trl">📊 Set alerts</div><div class="trd">Notify when a set ends</div></div><button class="tt ${settings.alertSet?'on':'off'}" onclick="settings.alertSet=!settings.alertSet;saveSettings()"><div class="td ${settings.alertSet?'on':'off'}"></div></button></div>
+    <div class="tr" style="border-bottom:none"><div><div class="trl">🏆 Match alerts</div><div class="trd">Notify on match start & result</div></div><button class="tt ${settings.alertMatch?'on':'off'}" onclick="settings.alertMatch=!settings.alertMatch;saveSettings()"><div class="td ${settings.alertMatch?'on':'off'}"></div></button></div>
+    <div style="margin-top:20px;padding:14px;background:rgba(255,255,255,.02);border-radius:10px;border:1px solid rgba(255,255,255,.04)">
+      <div style="font-size:11px;color:var(--t3);margin-bottom:4px">HOW IT WORKS</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.5">Add this site to your Home Screen for best experience on iPhone. Push notifications are sent automatically when game/set/match events occur.</div>
+    </div>
+  </div>`}
+
+function locPicker(){
+  return`<label class="fl">LOCATION</label>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <button class="lbtn ${locMode==='gps'?'act':''}" onclick="locMode='gps';useGPS()">${gpsLoading?'...':'📍 GPS'}</button>
+      <button class="lbtn ${locMode==='search'?'act':''}" onclick="locMode='search';render()">🔍 Search</button>
+      <button class="lbtn ${locMode==='manual'?'act':''}" onclick="locMode='manual';render()">✏️ Type</button>
+    </div>
+    ${locMode==='manual'?`<input class="fi" id="loc-input" value="${e(S.location)}" placeholder="Address or venue" onchange="S.location=this.value" onblur="if(S.location&&!S.indoor)fetchWeather(S.location)">`:''}
+    ${locMode==='search'?`<div style="display:flex;gap:8px"><input class="fi" style="flex:1" id="search-input" value="${e(searchQuery)}" placeholder="Search venue..." oninput="searchQuery=this.value" onkeydown="if(event.key==='Enter')searchVenue()"><button class="sm b" style="flex:none;padding:10px 16px" onclick="searchVenue()">GO</button></div>${searchResults.length?'<div style="margin-top:8px">'+searchResults.map((r,i)=>`<div onclick="pickResult(searchResults[${i}])" style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;font-size:13px;color:var(--t1);font-weight:600">${e(r.name)}</div>`).join('')+'</div>':''}`:''}
+    ${locMode==='gps'&&gpsLoading?'<div style="font-size:13px;color:var(--t3);padding:10px 0">📍 Getting location...</div>':''}
+    ${locMode==='gps'&&!gpsLoading&&S.location?`<div style="font-size:13px;color:var(--t2);padding:8px 0">📍 ${e(S.location)}</div>`:''}
+    <div style="height:12px"></div>
+    <div style="display:flex;gap:8px">
+      <button class="pl ${S.indoor?'a':''}" onclick="S.indoor=true;weatherData=null;render()">🏢 Indoor</button>
+      <button class="pl ${!S.indoor?'a':''}" onclick="S.indoor=false;if(S.location)fetchWeather(S.location);else render()">☀️ Outdoor</button>
+    </div>
+    ${!S.indoor&&weatherData?`<div style="margin-top:12px;padding:12px 14px;background:rgba(255,255,255,.03);border-radius:10px;border:1px solid var(--brd)"><div style="font-size:14px;font-weight:600;color:var(--t1)">🌤 ${weatherData.temp} · ${weatherData.desc}</div></div>`:''}
+    ${!S.indoor&&!weatherData&&S.location?`<button class="sm b" style="width:100%;margin-top:10px" onclick="fetchWeather(S.location)">Fetch Weather</button>`:''}`}
 
 function render(){
   const app=document.getElementById("app");const n=S.sets.length;const gc=`1fr repeat(${n},44px) 58px`;
+  const lastPlay=S.pointLog&&S.pointLog.length>0?S.pointLog[S.pointLog.length-1]:null;
 
   // Name prompt
-  if(showNamePrompt){app.innerHTML=`${titleHtml()}<div class="card sc"><div style="text-align:center;margin-bottom:20px;font-size:13px;letter-spacing:3px;color:var(--ac);font-weight:700">ENTER SCORER MODE</div><label class="fl">YOUR NAME</label><input class="fi" id="sn-input" value="${e(scorerName)}" placeholder="Enter your name" autofocus><button class="go" style="opacity:0.4;pointer-events:none" id="sn-go" onclick="enterScorer(document.getElementById('sn-input').value.trim())">CONTINUE</button><button class="sm" style="width:100%;margin-top:12px" onclick="showNamePrompt=false;render()">CANCEL</button></div>`;setTimeout(()=>{const inp=document.getElementById('sn-input'),btn=document.getElementById('sn-go');if(inp){inp.oninput=()=>{const v=inp.value.trim();btn.style.opacity=v?'1':'0.4';btn.style.pointerEvents=v?'auto':'none'};inp.focus()}},0);return}
+  if(showNamePrompt){app.innerHTML=`${titleH()}<div class="card sc"><div class="tac" style="margin-bottom:20px;font-size:13px;letter-spacing:3px;color:var(--ac);font-weight:700">ENTER SCORER MODE</div><label class="fl">YOUR NAME</label><input class="fi" id="sn-input" value="${e(scorerName)}" placeholder="Enter your name" autofocus><button class="go" style="opacity:0.4;pointer-events:none" id="sn-go" onclick="enterScorer(document.getElementById('sn-input').value.trim())">CONTINUE</button><button class="sm" style="width:100%;margin-top:12px" onclick="showNamePrompt=false;render()">CANCEL</button></div>`;setTimeout(()=>{const inp=document.getElementById('sn-input'),btn=document.getElementById('sn-go');if(inp){inp.oninput=()=>{const v=inp.value.trim();btn.style.opacity=v?'1':'0.4';btn.style.pointerEvents=v?'auto':'none'};inp.focus()}},0);return}
 
   // Scorer warning
-  if(showScorerWarn){app.innerHTML=`${titleHtml()}<div class="card sc"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px;margin-bottom:12px">⚠️</div><div style="font-size:16px;font-weight:700;margin-bottom:8px">Active Scorer Detected</div><div style="font-size:14px;color:var(--t2);line-height:1.5"><strong style="color:var(--ac)">${e(S.activeScorer)}</strong> is currently scoring this match. Continuing may cause conflicts.</div></div><label class="fl" style="margin-top:20px">YOUR NAME</label><input class="fi" id="sw-input" value="${e(scorerName)}" placeholder="Enter your name" autofocus><button class="go warn" style="opacity:0.4;pointer-events:none" id="sw-go" onclick="enterScorer(document.getElementById('sw-input').value.trim())">TAKE OVER SCORING</button><button class="sm" style="width:100%;margin-top:12px" onclick="showScorerWarn=false;render()">GO BACK</button></div>`;setTimeout(()=>{const inp=document.getElementById('sw-input'),btn=document.getElementById('sw-go');if(inp){inp.oninput=()=>{const v=inp.value.trim();btn.style.opacity=v?'1':'0.4';btn.style.pointerEvents=v?'auto':'none'};inp.focus()}},0);return}
+  if(showScorerWarn){app.innerHTML=`${titleH()}<div class="card sc"><div class="tac" style="margin-bottom:16px"><div style="font-size:32px;margin-bottom:12px">⚠️</div><div style="font-size:16px;font-weight:700;margin-bottom:8px">Active Scorer</div><div style="font-size:14px;color:var(--t2)"><strong style="color:var(--ac)">${e(S.activeScorer)}</strong> is scoring.</div></div><label class="fl" style="margin-top:20px">YOUR NAME</label><input class="fi" id="sw-input" value="${e(scorerName)}" placeholder="Your name" autofocus><button class="go warn" style="opacity:0.4;pointer-events:none" id="sw-go" onclick="enterScorer(document.getElementById('sw-input').value.trim())">TAKE OVER</button><button class="sm" style="width:100%;margin-top:12px" onclick="showScorerWarn=false;render()">GO BACK</button></div>`;setTimeout(()=>{const inp=document.getElementById('sw-input'),btn=document.getElementById('sw-go');if(inp){inp.oninput=()=>{const v=inp.value.trim();btn.style.opacity=v?'1':'0.4';btn.style.pointerEvents=v?'auto':'none'};inp.focus()}},0);return}
 
   // History detail
-  if(viewHist){const m=viewHist;app.innerHTML=`${titleHtml()}<div class="card" style="padding:24px 20px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><button class="sm" onclick="viewHist=null;render()" style="flex:0;padding:8px 16px">← BACK</button><div style="font-size:11px;color:var(--t3)">${fd(m.date)}</div></div><div id="sxa" style="background:#0D1520;padding:16px;border-radius:12px"><div style="text-align:center;margin-bottom:16px"><div style="font-size:10px;letter-spacing:4px;color:var(--t3);font-weight:700;margin-bottom:4px">AUSTIN'S TENNIS</div><div style="font-size:16px;font-weight:700;margin-bottom:4px">${e(m.player1)} vs ${e(m.player2)}</div><div style="font-size:13px;color:var(--ac);font-weight:600">🏆 ${e(m.winner===0?m.player1:m.player2)} wins</div><div style="margin-top:4px;font-size:11px;color:var(--t3)">${m.noAd?"No-Ad":"Ad"} · ${m.gamesPerSet||6}g${m.thirdSetFormat==="supertb"?" · 3rd: STB":""}${m.matchDuration?" · "+m.matchDuration:""}</div><div style="margin-top:8px;font-family:'JetBrains Mono',monospace;font-weight:600">${(m.sets||[]).map(s=>`<span style="margin:0 4px">${s.games[0]}-${s.games[1]}</span>`).join('')}</div></div>${rStats(m.pointLog,m.player1,m.player2)}</div><button class="sm b" style="width:100%;margin-top:14px" onclick="exportStats()">📸 EXPORT AS IMAGE</button></div>`;return}
+  if(viewHist){const m=viewHist;app.innerHTML=`${titleH()}<div class="card" style="padding:24px 20px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><button class="sm" onclick="viewHist=null;render()" style="flex:0;padding:8px 16px">← BACK</button><div style="font-size:11px;color:var(--t3)">${fd(m.date)}</div></div><div style="text-align:center;margin-bottom:16px"><div style="font-size:16px;font-weight:700;margin-bottom:4px">${e(m.player1)} vs ${e(m.player2)}</div><div style="font-size:13px;color:var(--ac);font-weight:600">🏆 ${e(m.winner===0?m.player1:m.player2)} wins</div><div style="margin-top:4px;font-size:11px;color:var(--t3)">${m.noAd?"No-Ad":"Ad"} · ${m.gamesPerSet||6}g${m.matchDuration?" · "+m.matchDuration:""}${m.location?" · 📍"+e(m.location):""}${m.indoor===false&&m.weather?" · "+m.weather.temp+" "+m.weather.desc:""}</div><div style="margin-top:8px;font-family:'JetBrains Mono',monospace;font-weight:600">${(m.sets||[]).map(s=>`<span style="margin:0 4px">${s.games[0]}-${s.games[1]}</span>`).join('')}</div></div>${rStats(m.pointLog,m.player1,m.player2)}<div class="stt" style="margin-top:20px">Play-by-Play</div>${rPBP(m.pointLog,m.player1,m.player2)}</div>`;return}
 
   // Setup
-  if(showSetup&&isAdmin){const s3=S.matchFormat===3;app.innerHTML=`${titleHtml()}<div class="card sc"><div style="text-align:center;margin-bottom:28px;font-size:13px;letter-spacing:3px;color:var(--ac);font-weight:700">MATCH SETUP</div><label class="fl">PLAYER 1</label><input class="fi" id="ip1" value="${e(S.player1)}" placeholder="Austin"><div class="sp"></div><label class="fl">PLAYER 2</label><input class="fi" id="ip2" value="${e(S.player2)}" placeholder="Opponent"><div class="sp"></div><label class="fl">MATCH FORMAT</label><div class="pg">${[1,3].map(n=>`<button class="pl ${S.matchFormat===n?'a':''}" onclick="S.matchFormat=${n};render()">${n===1?'Single set':'Best of 3'}</button>`).join('')}</div><div class="sp"></div><label class="fl">GAMES PER SET</label><div class="pg">${[4,6].map(n=>`<button class="pl ${S.gamesPerSet===n?'a':''}" onclick="S.gamesPerSet=${n};render()">${n} games</button>`).join('')}</div>${s3?`<div class="sp"></div><label class="fl">3RD SET FORMAT</label><div class="pg"><button class="pl ${S.thirdSetFormat==='regular'?'a':''}" onclick="S.thirdSetFormat='regular';render()">Regular set</button><button class="pl ${S.thirdSetFormat==='supertb'?'a':''}" onclick="S.thirdSetFormat='supertb';render()">10-pt tiebreak</button></div>`:''}<div class="sp"></div><label class="fl">SCORING</label><div class="pg"><button class="pl ${!S.noAd?'a':''}" onclick="S.noAd=false;render()">Ad scoring</button><button class="pl ${S.noAd?'a':''}" onclick="S.noAd=true;render()">No-Ad</button></div><div class="sp"></div><label class="fl">FIRST SERVER</label><div class="pg">${[0,1].map(i=>`<button class="pl ${S.serving===i?'a':''}" onclick="S.serving=${i};render()">${e(i===0?S.player1||'P1':S.player2||'P2')}</button>`).join('')}</div><button class="go" onclick="syncN();startMatch()">Start Match</button></div>${modeToggle()}`;setTimeout(()=>{const p1=document.getElementById('ip1'),p2=document.getElementById('ip2');if(p1)p1.oninput=()=>{S.player1=p1.value};if(p2)p2.oninput=()=>{S.player2=p2.value}},0);return}
+  if(showSetup&&isAdmin){const s3=S.matchFormat===3;app.innerHTML=`${titleH()}<div class="card sc"><div class="tac" style="margin-bottom:28px;font-size:13px;letter-spacing:3px;color:var(--ac);font-weight:700">MATCH SETUP</div><label class="fl">PLAYER 1</label><input class="fi" id="ip1" value="${e(S.player1)}" placeholder="Austin"><div class="sp"></div><label class="fl">PLAYER 2</label><input class="fi" id="ip2" value="${e(S.player2)}" placeholder="Opponent"><div class="sp"></div><label class="fl">MATCH FORMAT</label><div class="pg">${[1,3].map(n=>`<button class="pl ${S.matchFormat===n?'a':''}" onclick="S.matchFormat=${n};render()">${n===1?'Single set':'Best of 3'}</button>`).join('')}</div><div class="sp"></div><label class="fl">GAMES PER SET</label><div class="pg">${[4,6].map(n=>`<button class="pl ${S.gamesPerSet===n?'a':''}" onclick="S.gamesPerSet=${n};render()">${n} games</button>`).join('')}</div>${s3?`<div class="sp"></div><label class="fl">3RD SET FORMAT</label><div class="pg"><button class="pl ${S.thirdSetFormat==='regular'?'a':''}" onclick="S.thirdSetFormat='regular';render()">Regular set</button><button class="pl ${S.thirdSetFormat==='supertb'?'a':''}" onclick="S.thirdSetFormat='supertb';render()">10-pt TB</button></div>`:''}<div class="sp"></div><label class="fl">SCORING</label><div class="pg"><button class="pl ${!S.noAd?'a':''}" onclick="S.noAd=false;render()">Ad scoring</button><button class="pl ${S.noAd?'a':''}" onclick="S.noAd=true;render()">No-Ad</button></div><div class="sp"></div><label class="fl">FIRST SERVER</label><div class="pg">${[0,1].map(i=>`<button class="pl ${S.serving===i?'a':''}" onclick="S.serving=${i};render()">${e(i===0?S.player1||'P1':S.player2||'P2')}</button>`).join('')}</div><div class="sp"></div>${locPicker()}<button class="go" onclick="syncN();startMatch()">Start Match</button></div>${modeToggle()}`;setTimeout(()=>{const p1=document.getElementById('ip1'),p2=document.getElementById('ip2');if(p1)p1.oninput=()=>{S.player1=p1.value};if(p2)p2.oninput=()=>{S.player2=p2.value}},0);return}
 
   // No match (viewer)
-  if(!S.matchStarted&&!isAdmin){app.innerHTML=`<div id="loading" class="hidden"></div>${titleHtml()}${tabsHtml()}${viewTab==='live'?`<div class="card idle"><div style="font-size:40px;margin-bottom:16px">🎾</div><div style="font-size:16px;font-weight:600;color:var(--t2);margin-bottom:6px">No match in progress</div><div style="font-size:13px;color:var(--t3)">Waiting for the scorer to start a match</div></div>`:''}${viewTab==='history'?histList():''}${modeToggle()}`;return}
+  if(!S.matchStarted&&!isAdmin){app.innerHTML=`<div id="loading" class="hidden"></div>${titleH()}${tabsH()}${viewTab==='live'?`<div class="card idle"><div style="font-size:40px;margin-bottom:16px">🎾</div><div style="font-size:16px;font-weight:600;color:var(--t2);margin-bottom:6px">No match in progress</div><div style="font-size:13px;color:var(--t3)">Waiting for scorer to start</div></div>`:''}${viewTab==='history'?histList():''}${viewTab==='settings'?settingsTab():''}${modeToggle()}`;return}
 
   // Scoreboard
   const c=cs();const stb=isSTB(S);
   let statusH='';
   if(S.matchOver)statusH=`<div class="wb">🏆&nbsp; ${e(S.winner===0?S.player1:S.player2)} WINS</div>`;
-  else{const lb=stb?'SUPER TIEBREAK':c.tiebreak?'TIEBREAK':'LIVE';const tm=S.lastUpdated?`<span class="st">${ft(S.lastUpdated)}</span>`:'';statusH=`<span class="ld"></span><span class="sl">${lb}</span>${tm}<span class="tmr" id="mtimer" style="margin-left:10px">${getEl()}</span>`}
+  else{const lb=stb?'SUPER TIEBREAK':c.tiebreak?'TIEBREAK':'LIVE';statusH=`<span class="ld"></span><span style="font-size:11px;letter-spacing:3px;color:var(--t3);font-weight:700">${lb}</span>${S.lastUpdated?`<span style="font-size:11px;color:var(--t3);margin-left:8px;opacity:.6">${ft(S.lastUpdated)}</span>`:''}<span class="tmr" id="mtimer" style="margin-left:10px">${getEl()}</span>`}
 
   let rows='';
   for(let pi=0;pi<2;pi++){const isW=S.matchOver&&S.winner===pi,isSrv=S.serving===pi&&!S.matchOver,nm=pi===0?S.player1:S.player2;
@@ -231,24 +351,28 @@ function render(){
 
   const ptL=stb?'STB':c.tiebreak?'TB':'PTS';
   let cH='';for(let i=0;i<n;i++){const l=i===2&&S.thirdSetFormat==='supertb'?'STB':(i+1).toString();cH+=`<div style="text-align:center;font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1.5px">${l}</div>`}
-  const fL=S.matchFormat===1?'Single set':'Best of '+S.matchFormat;const scL=S.noAd?'No-Ad':'Ad';const t3=S.matchFormat===3&&S.thirdSetFormat==='supertb'?' · 3rd: STB':'';
+  const fL=S.matchFormat===1?'1 set':'Bo3';const scL=S.noAd?'NA':'Ad';const t3=S.matchFormat===3&&S.thirdSetFormat==='supertb'?' · STB':'';
+
+  // Last play with score
+  let lastPlayH='';
+  if(lastPlay){const lw=lastPlay.player===0?S.player1:S.player2;const lt=lastPlay.tag==="No tag"?"":" — "+lastPlay.tag;const lc=lastPlay.player===0?"var(--ac)":"var(--blue)";const lsc=lastPlay.score||"";
+    lastPlayH=`<div style="width:100%;max-width:540px;margin-bottom:12px;padding:10px 14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:10px;display:flex;align-items:flex-start;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:${lc};flex-shrink:0;margin-top:5px"></div><div><div style="font-size:12px;color:var(--t2)"><strong style="color:${lc}">${e(lw)}</strong> wins point${lt}</div><div class="pbp-score">${e(lsc)}</div></div></div>`}
 
   let adm='';
   if(isAdmin&&!S.matchOver&&S.matchStarted){const cu=S.stateHistory&&S.stateHistory.length>0;
-    adm=`<div class="mt22"><div class="scl">SCORE POINT</div><div class="flex g10"><button class="sb" onclick="bsp(0)">${e(S.player1)}</button><button class="sb" onclick="bsp(1)">${e(S.player2)}</button></div><div class="flex g10 mt10"><button class="sm" onclick="undo()" ${cu?'':'style="opacity:.3;pointer-events:none"'}>↩ UNDO</button><button class="sm b" onclick="sw()">🔄 SERVER</button></div><div class="flex g10 mt10"><button class="sm d" onclick="confirmReset=true;render()">RESET MATCH</button></div><div class="tr"><span class="trl">Point tagging</span><button class="tt ${tagsEnabled?'on':'off'}" onclick="tagsEnabled=!tagsEnabled;render()"><div class="td ${tagsEnabled?'on':'off'}"></div></button></div></div>`}
-  else if(isAdmin&&S.matchOver){adm=`<div class="mt22 tac"><button class="go" style="margin-top:0;margin-bottom:10px" onclick="confirmFinalize=true;render()">SAVE & NEW MATCH</button><button class="sm" style="width:100%" onclick="doReset()">NEW MATCH (DON'T SAVE)</button></div>`}
+    adm=`<div class="mt22"><div class="scl">SCORE POINT</div><div class="flex g10"><button class="sb" onclick="bsp(0)">${e(S.player1)}</button><button class="sb" onclick="bsp(1)">${e(S.player2)}</button></div><div class="flex g10 mt10"><button class="sm" onclick="undo()" ${cu?'':'style="opacity:.3;pointer-events:none"'}>↩ UNDO</button><button class="sm b" onclick="sw()">🔄 SERVER</button></div><div class="flex g10 mt10"><button class="sm d" onclick="confirmReset=true;render()">RESET MATCH</button></div><div class="tr" style="border-bottom:none"><div><div class="trl" style="font-size:13px">Point tagging</div></div><button class="tt ${tagsEnabled?'on':'off'}" onclick="tagsEnabled=!tagsEnabled;render()"><div class="td ${tagsEnabled?'on':'off'}"></div></button></div></div>`}
+  else if(isAdmin&&S.matchOver){adm=`<div class="mt22 tac"><button class="go" style="margin-top:0;margin-bottom:10px" onclick="confirmFinalize=true;render()">SAVE & NEW MATCH</button><button class="sm" style="width:100%" onclick="doReset()">DON'T SAVE</button></div>`}
 
-  let statsH='';
-  if(S.pointLog&&S.pointLog.length>0){const stT=S.matchOver?'MATCH STATS':'LIVE STATS';
-    statsH=`<div class="card mt22" style="padding:20px" id="sxa"><div style="text-align:center;margin-bottom:12px"><div style="font-size:10px;letter-spacing:4px;color:var(--t3);font-weight:700;margin-bottom:2px">AUSTIN'S TENNIS</div><div style="font-size:13px;letter-spacing:2px;color:var(--ac);font-weight:700">${stT}</div>${S.matchOver?`<div style="margin-top:4px;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px">${S.sets.map(s=>`<span style="margin:0 3px">${s.games[0]}-${s.games[1]}</span>`).join('')}</div>`:''}</div>${rStats(S.pointLog,S.player1,S.player2)}</div>${S.matchOver?`<button class="sm b mt10" style="width:100%" onclick="exportStats()">📸 EXPORT AS IMAGE</button>`:''}`}
-
-  app.innerHTML=`<div id="loading" class="hidden"></div>${titleHtml()}${tabsHtml()}
-    ${viewTab==='live'?`<div class="tac" style="margin-bottom:16px">${statusH}${!isAdmin?scorerBadge():''}</div><div class="card"><div class="sh" style="grid-template-columns:${gc}"><div style="font-size:11px;color:var(--t3);font-weight:600;letter-spacing:1px">${fL} · ${S.gamesPerSet}g · ${scL}${t3}</div>${cH}<div style="text-align:center;font-size:10px;color:var(--t2);font-weight:700;letter-spacing:1.5px">${ptL}</div></div>${rows}</div>${adm}${statsH}`:''}
+  app.innerHTML=`<div id="loading" class="hidden"></div>${titleH()}${tabsH()}
+    ${viewTab==='live'?`<div class="tac" style="margin-bottom:16px">${statusH}${S.location?`<div style="font-size:11px;color:var(--t3);margin-top:4px">📍 ${e(S.location)}${!S.indoor&&S.weather?' · '+S.weather.temp+' '+S.weather.desc:S.indoor?' · Indoor':''}</div>`:''}${!isAdmin?scorerBadge():''}</div>${lastPlayH}<div class="card"><div class="sh" style="grid-template-columns:${gc}"><div style="font-size:11px;color:var(--t3);font-weight:600;letter-spacing:1px">${fL} · ${S.gamesPerSet}g · ${scL}${t3}</div>${cH}<div style="text-align:center;font-size:10px;color:var(--t2);font-weight:700;letter-spacing:1.5px">${ptL}</div></div>${rows}</div>${adm}`:''}
+    ${viewTab==='pbp'?`<div class="card" style="padding:16px"><div class="tac" style="margin-bottom:12px;font-size:13px;letter-spacing:2px;color:var(--ac);font-weight:700">PLAY-BY-PLAY</div>${rPBP(S.pointLog,S.player1,S.player2)}</div>`:''}
+    ${viewTab==='stats'?`<div class="card" style="padding:20px"><div class="tac" style="margin-bottom:12px;font-size:13px;letter-spacing:2px;color:var(--ac);font-weight:700">${S.matchOver?'MATCH STATS':'LIVE STATS'}</div>${rStats(S.pointLog,S.player1,S.player2)}</div>`:''}
     ${viewTab==='history'?histList():''}
+    ${viewTab==='settings'?settingsTab():''}
     ${modeToggle()}
-    ${pendingPoint!==null?`<div class="ov"><div class="ob"><div style="font-size:18px;font-weight:700;margin-bottom:4px">How was the point won?</div><div style="font-size:13px;color:var(--t2);margin-bottom:4px">Point for <strong style="color:var(--ac)">${e(pendingPoint.player===0?S.player1:S.player2)}</strong></div><div class="tg">${getTagsFor(pendingPoint.player).map(t=>`<button class="tb2 ${TC[t]||''}" onclick="csp('${t}');render()">${t}</button>`).join('')}</div><button class="sm" style="width:100%;margin-top:8px" onclick="pendingPoint=null;render()">CANCEL</button></div></div>`:''}
-    ${confirmReset?`<div class="ov" onclick="confirmReset=false;render()"><div class="ob" onclick="event.stopPropagation()"><div style="font-size:18px;font-weight:700;margin-bottom:8px">Reset Match?</div><div style="font-size:14px;color:var(--t2);margin-bottom:22px">This will clear all scores and return to setup.</div><div class="flex g10"><button class="sm" style="flex:1" onclick="event.stopPropagation();confirmReset=false;render()">CANCEL</button><button class="sm d" style="flex:1" onclick="event.stopPropagation();doReset()">RESET</button></div></div></div>`:''}
-    ${confirmFinalize?`<div class="ov" onclick="confirmFinalize=false;render()"><div class="ob" onclick="event.stopPropagation()"><div style="font-size:18px;font-weight:700;margin-bottom:8px">Save Match?</div><div style="font-size:14px;color:var(--t2);margin-bottom:22px">This will save the match to history and start a new one.</div><div class="flex g10"><button class="sm" style="flex:1" onclick="event.stopPropagation();confirmFinalize=false;render()">CANCEL</button><button class="sm" style="flex:1;border-color:var(--brd-a);color:var(--ac)" onclick="event.stopPropagation();doFinalize()">SAVE</button></div></div></div>`:''}
+    ${pendingPoint!==null?`<div class="ov"><div class="ob"><div style="font-size:18px;font-weight:700;margin-bottom:4px">How was the point won?</div><div style="font-size:13px;color:var(--t2);margin-bottom:4px">Point for <strong style="color:var(--ac)">${e(pendingPoint.player===0?S.player1:S.player2)}</strong></div><div class="tg">${getTagsFor(pendingPoint.player).map(t=>`<button class="tb2 ${TC[t]||''}" onclick="csp('${t}')">${t}</button>`).join('')}</div><button class="sm" style="width:100%;margin-top:8px" onclick="pendingPoint=null;render()">CANCEL</button></div></div>`:''}
+    ${confirmReset?`<div class="ov" onclick="confirmReset=false;render()"><div class="ob" onclick="event.stopPropagation()"><div style="font-size:18px;font-weight:700;margin-bottom:8px">Reset Match?</div><div style="font-size:14px;color:var(--t2);margin-bottom:22px">Clear scores and return to setup.</div><div class="flex g10"><button class="sm" style="flex:1" onclick="event.stopPropagation();confirmReset=false;render()">CANCEL</button><button class="sm d" style="flex:1" onclick="event.stopPropagation();doReset()">RESET</button></div></div></div>`:''}
+    ${confirmFinalize?`<div class="ov" onclick="confirmFinalize=false;render()"><div class="ob" onclick="event.stopPropagation()"><div style="font-size:18px;font-weight:700;margin-bottom:8px">Save Match?</div><div style="font-size:14px;color:var(--t2);margin-bottom:22px">Save to history and start new match.</div><div class="flex g10"><button class="sm" style="flex:1" onclick="event.stopPropagation();confirmFinalize=false;render()">CANCEL</button><button class="sm" style="flex:1;border-color:var(--ba);color:var(--ac)" onclick="event.stopPropagation();doFinalize()">SAVE</button></div></div></div>`:''}
     ${confirmDeleteKey?`<div class="ov" onclick="confirmDeleteKey=null;render()"><div class="ob" onclick="event.stopPropagation()"><div style="font-size:18px;font-weight:700;margin-bottom:8px">Delete Match?</div><div style="font-size:14px;color:var(--t2);margin-bottom:22px">This cannot be undone.</div><div class="flex g10"><button class="sm" style="flex:1" onclick="event.stopPropagation();confirmDeleteKey=null;render()">CANCEL</button><button class="sm d" style="flex:1" onclick="event.stopPropagation();doDel()">DELETE</button></div></div></div>`:''}`}
 
 function syncN(){const p1=document.getElementById('ip1'),p2=document.getElementById('ip2');if(p1)S.player1=p1.value||'Austin';if(p2)S.player2=p2.value||'Opponent'}
