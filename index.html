@@ -111,7 +111,7 @@ firebase.initializeApp({apiKey:"AIzaSyAP4pLIRiHIXGAR1AWVvRymd6yHnVmRV5Q",authDom
 const db=firebase.database(),mRef=db.ref("match"),hRef=db.ref("history"),nRef=db.ref("notifications");
 
 // FCM token registration — stores this device's push token so Cloud Function can fan out
-const VAPID_KEY="YOUR_VAPID_KEY_HERE"; // replace from Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
+const VAPID_KEY="BJQvLm_-T8KLwHZdZQu3aV0_FwKKsmybA4lh8jopn6kMHWOA4dMQfXGQqNXIlvmmZnQQv0jFhRQ0WoF3Ul_H8LM";
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('./firebase-messaging-sw.js').then(reg=>{
     const msg=firebase.messaging();
