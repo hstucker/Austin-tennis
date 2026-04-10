@@ -105,9 +105,21 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(212,225,87,
 <div class="ctr" id="app"><div id="loading" class="tac" style="margin-top:80px"><div style="color:var(--t3);font-size:14px;letter-spacing:3px">LOADING...</div></div></div>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 <script>
 firebase.initializeApp({apiKey:"AIzaSyAP4pLIRiHIXGAR1AWVvRymd6yHnVmRV5Q",authDomain:"austin-tennis.firebaseapp.com",databaseURL:"https://austin-tennis-default-rtdb.firebaseio.com",projectId:"austin-tennis",storageBucket:"austin-tennis.firebasestorage.app",messagingSenderId:"652090047111",appId:"1:652090047111:web:b1795d9f47a70edbaa5622"});
 const db=firebase.database(),mRef=db.ref("match"),hRef=db.ref("history"),nRef=db.ref("notifications");
+
+// FCM token registration — stores this device's push token so Cloud Function can fan out
+const VAPID_KEY="YOUR_VAPID_KEY_HERE"; // replace from Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./firebase-messaging-sw.js').then(reg=>{
+    const msg=firebase.messaging();
+    msg.getToken({vapidKey:VAPID_KEY,serviceWorkerRegistration:reg}).then(tok=>{
+      if(tok)db.ref('fcmTokens/'+tok.replace(/[.#$[\]]/g,'_')).set(true);
+    }).catch(()=>{});
+  }).catch(()=>{});
+}
 const PL=["0","15","30","40"],TAGS=["Ace","Unreturned serve","Double fault","FH winner","BH winner","Dropshot winner","Volley winner","Overhead winner","Unforced error","Forced error","No tag"];
 const TC={"Ace":"ace","Unreturned serve":"ace","Double fault":"df","FH winner":"wn","BH winner":"wn","Dropshot winner":"wn","Volley winner":"wn","Overhead winner":"wn","Unforced error":"er","Forced error":"er","No tag":"sk"};
 const HB_INT=10000,HB_TO=35000;
@@ -152,7 +164,7 @@ function getTagsFor(pi){const isServing=S.serving===pi;if(isServing)return TAGS.
 function dsp(pi,tag){
   snap();const ns=JSON.parse(JSON.stringify(S));const c=ns.sets[ns.sets.length-1];
   if(!ns.pointLog)ns.pointLog=[];
-  ns.pointLog.push({player:pi,tag:tag,set:ns.sets.length-1,serving:ns.serving,onServe:ns.serving===pi});
+  ns.pointLog.push({player:pi,tag:tag,set:ns.sets.length-1,serving:ns.serving,onServe:ns.serving===pi,gp:[...ns.currentGame],gg:[...c.games],tb:c.tiebreak,tbp:[...c.tiebreakPoints],stb:isSTB(ns)});
   if(isSTB(ns)){c.tiebreakPoints[pi]++;const[a,b]=c.tiebreakPoints;const t=a+b;if(t===1||(t>1&&(t-1)%2===0))ns.serving=ns.serving===0?1:0;if(a>=10&&a-b>=2){c.games[0]=1;c.games[1]=0;fset(ns)}else if(b>=10&&b-a>=2){c.games[0]=0;c.games[1]=1;fset(ns)}else{ns.lastUpdated=new Date().toISOString();save(ns)}return}
   if(c.tiebreak){c.tiebreakPoints[pi]++;const[a,b]=c.tiebreakPoints;const t=a+b;if(t===1||(t>1&&(t-1)%2===0))ns.serving=ns.serving===0?1:0;if(a>=7&&a-b>=2){c.games[0]=ns.gamesPerSet+1;c.games[1]=ns.gamesPerSet;fset(ns)}else if(b>=7&&b-a>=2){c.games[0]=ns.gamesPerSet;c.games[1]=ns.gamesPerSet+1;fset(ns)}else{ns.lastUpdated=new Date().toISOString();save(ns)}return}
   const[a,b]=ns.currentGame;
@@ -205,11 +217,20 @@ function modeToggle(){const label=isAdmin?'SWITCH TO VIEWER':'SWITCH TO SCORER';
 function titleHtml(){return`<div class="tb"><div class="ts">AUSTIN'S</div><div class="tm">Tennis Scoring App</div><div class="tbar"></div></div>`}
 function tabsHtml(){return`<div class="tabs"><button class="tab ${viewTab==='live'?'a':''}" onclick="viewTab='live';render()">LIVE</button><button class="tab ${viewTab==='pbp'?'a':''}" onclick="viewTab='pbp';render()">PLAY-BY-PLAY</button><button class="tab ${viewTab==='stats'?'a':''}" onclick="viewTab='stats';render()">STATS</button><button class="tab ${viewTab==='history'?'a':''}" onclick="viewTab='history';render()">HISTORY</button><button class="tab ${viewTab==='settings'?'a':''}" onclick="viewTab='settings';render()">⚙️</button></div>`}
 
+function fmtPtScore(pt){
+  if(!pt.gp)return'';
+  let g;
+  if(pt.stb||pt.tb){g=(pt.tbp||[0,0])[0]+'-'+(pt.tbp||[0,0])[1]}
+  else{const[a,b]=pt.gp;const fa=a>=3&&b>=3?(a>b?'AD':a===b?'40':'–'):(PL[a]||a);const fb=b>=3&&a>=3?(b>a?'AD':b===a?'40':'–'):(PL[b]||b);g=fa+'-'+fb}
+  const[g0,g1]=pt.gg||[0,0];
+  return`${g} · ${g0}-${g1} · S${(pt.set||0)+1}`
+}
+
 function pbpHtml(){
   if(!S.pointLog||!S.pointLog.length)return`<div class="card mt22" style="padding:24px;text-align:center;color:var(--t3);font-size:14px">No points logged yet.</div>`;
   const pts=[...S.pointLog].reverse();
   let h='<div class="card mt22">';
-  pts.forEach(pt=>{const pname=pt.player===0?S.player1:S.player2;const tc=TC[pt.tag]||'sk';const srv=pt.serving===pt.player;h+=`<div class="pbpr"><span style="font-size:9px;color:var(--t3);width:14px;text-align:center;flex-shrink:0">${srv?'●':''}</span><span style="font-size:14px;font-weight:600;flex:1;color:${pt.player===0?'var(--ac)':'var(--blue)'}">${e(pname)}</span><span class="tb2 ${tc}" style="font-size:10px;padding:3px 9px;display:inline-block">${pt.tag}</span></div>`});
+  pts.forEach(pt=>{const pname=pt.player===0?S.player1:S.player2;const tc=TC[pt.tag]||'sk';const srv=pt.serving===pt.player;const sc=fmtPtScore(pt);h+=`<div class="pbpr"><span style="font-size:9px;color:var(--t3);width:14px;text-align:center;flex-shrink:0">${srv?'●':''}</span><span style="font-size:14px;font-weight:600;color:${pt.player===0?'var(--ac)':'var(--blue)'}">${e(pname)}</span>${sc?`<span style="font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace;flex:1;text-align:right;padding-right:8px">${sc}</span>`:'<span style="flex:1"></span>'}<span class="tb2 ${tc}" style="font-size:10px;padding:3px 9px;display:inline-block;flex-shrink:0">${pt.tag}</span></div>`});
   h+='</div>';return h;
 }
 
