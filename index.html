@@ -110,15 +110,23 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(212,225,87,
 firebase.initializeApp({apiKey:"AIzaSyAP4pLIRiHIXGAR1AWVvRymd6yHnVmRV5Q",authDomain:"austin-tennis.firebaseapp.com",databaseURL:"https://austin-tennis-default-rtdb.firebaseio.com",projectId:"austin-tennis",storageBucket:"austin-tennis.firebasestorage.app",messagingSenderId:"652090047111",appId:"1:652090047111:web:b1795d9f47a70edbaa5622"});
 const db=firebase.database(),mRef=db.ref("match"),hRef=db.ref("history"),nRef=db.ref("notifications");
 
-// FCM token registration — stores this device's push token so Cloud Function can fan out
 const VAPID_KEY="BJQvLm_-T8KLwHZdZQu3aV0_FwKKsmybA4lh8jopn6kMHWOA4dMQfXGQqNXIlvmmZnQQv0jFhRQ0WoF3Ul_H8LM";
+let _swReg=null;
+
+// Register service worker immediately, but only request a token once permission is granted
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./firebase-messaging-sw.js').then(reg=>{
-    const msg=firebase.messaging();
-    msg.getToken({vapidKey:VAPID_KEY,serviceWorkerRegistration:reg}).then(tok=>{
-      if(tok)db.ref('fcmTokens/'+tok.replace(/[.#$[\]]/g,'_')).set(true);
-    }).catch(()=>{});
-  }).catch(()=>{});
+  navigator.serviceWorker.register('./firebase-messaging-sw.js')
+    .then(reg=>{_swReg=reg;_tryRegisterFCMToken()})
+    .catch(()=>{});
+}
+
+function _tryRegisterFCMToken(){
+  if(!_swReg||!('Notification' in window)||Notification.permission!=='granted')return;
+  try{
+    firebase.messaging().getToken({vapidKey:VAPID_KEY,serviceWorkerRegistration:_swReg})
+      .then(tok=>{if(tok)db.ref('fcmTokens/'+tok.replace(/[.#$[\]]/g,'_')).set(true)})
+      .catch(()=>{});
+  }catch(e){}
 }
 const PL=["0","15","30","40"],TAGS=["Ace","Unreturned serve","Double fault","FH winner","BH winner","Dropshot winner","Volley winner","Overhead winner","Unforced error","Forced error","No tag"];
 const TC={"Ace":"ace","Unreturned serve":"ace","Double fault":"df","FH winner":"wn","BH winner":"wn","Dropshot winner":"wn","Volley winner":"wn","Overhead winner":"wn","Unforced error":"er","Forced error":"er","No tag":"sk"};
@@ -191,7 +199,7 @@ function handleToggle(){
     else{showNamePrompt=true;render()}
   }else{stopHB();isAdmin=false;render()}
 }
-function enterScorer(name){scorerName=name;isAdmin=true;showNamePrompt=false;showScorerWarn=false;if(!S.matchStarted)showSetup=true;startHB();if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().then(()=>render());else render()}
+function enterScorer(name){scorerName=name;isAdmin=true;showNamePrompt=false;showScorerWarn=false;if(!S.matchStarted)showSetup=true;startHB();if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().then(()=>{_tryRegisterFCMToken();render()});else{_tryRegisterFCMToken();render()}}
 function startMatch(){S.matchStarted=true;S.lastUpdated=new Date().toISOString();S.matchStartTime=new Date().toISOString();S.pointLog=[];S.stateHistory=[];showSetup=false;save(S)}
 function doReset(){const f=JSON.parse(JSON.stringify(DEF));f.player1=S.player1;f.player2=S.player2;f.matchFormat=S.matchFormat;f.gamesPerSet=S.gamesPerSet;f.thirdSetFormat=S.thirdSetFormat;f.noAd=S.noAd;f.activeScorer=S.activeScorer;f.scorerHeartbeat=S.scorerHeartbeat;f.scorerId=S.scorerId;showSetup=true;confirmReset=false;confirmFinalize=false;save(f)}
 function doFinalize(){if(!S.matchOver)return;hRef.push({player1:S.player1,player2:S.player2,winner:S.winner,sets:S.sets,gamesPerSet:S.gamesPerSet,matchFormat:S.matchFormat,thirdSetFormat:S.thirdSetFormat,noAd:S.noAd,pointLog:S.pointLog||[],date:new Date().toISOString(),matchDuration:getEl(),indoor:S.indoor||false,location:S.location||"",weather:S.weather||null,p1Wtn:S.p1Wtn||"",p2Wtn:S.p2Wtn||""});doReset()}
@@ -209,7 +217,7 @@ const SVB=`<span class="svb"><svg width="16" height="16" viewBox="0 0 16 16"><ci
 function e(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function saveNotifSettings(){try{localStorage.setItem('atNotif',JSON.stringify(notifSettings))}catch(e){}}
 function saveLiveLink(v){liveLink=v;try{localStorage.setItem('atLink',v)}catch(e){}}
-function reqNotifPerm(){if(!('Notification' in window))return;Notification.requestPermission().then(()=>render())}
+function reqNotifPerm(){if(!('Notification' in window))return;Notification.requestPermission().then(()=>{_tryRegisterFCMToken();render()})}
 const NOTIF_ICON='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🎾</text></svg>';
 function dispNotif(v){if(!v||!('Notification' in window)||Notification.permission!=='granted')return;if(v.type==='game'&&!notifSettings.game)return;if(v.type==='set'&&!notifSettings.set)return;if(v.type==='match'&&!notifSettings.match)return;try{new Notification(v.title,{body:v.body,icon:NOTIF_ICON,tag:v.type||'tennis',renotify:true})}catch(e){}}
 function sendNotif(type,title,body){if(isAdmin)nRef.push({type,title,body,ts:new Date().toISOString()})}
