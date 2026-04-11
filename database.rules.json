@@ -1,0 +1,23 @@
+{
+  "rules": {
+    "match": {
+      ".read": true,
+      ".write": "auth != null && auth.token.firebase.sign_in_provider == 'password'"
+    },
+    "history": {
+      ".read": true,
+      ".write": "auth != null && auth.token.firebase.sign_in_provider == 'password'"
+    },
+    "notifications": {
+      ".read": true,
+      ".write": "auth != null && auth.token.firebase.sign_in_provider == 'password'"
+    },
+    "fcmTokens": {
+      ".read": false,
+      "$token": {
+        ".write": "auth != null",
+        ".validate": "newData.isBoolean()"
+      }
+    }
+  }
+}
