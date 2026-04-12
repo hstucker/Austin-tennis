@@ -110,7 +110,8 @@ body{background-image:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(212,225,87,
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 <script>
 firebase.initializeApp({apiKey:"AIzaSyAP4pLIRiHIXGAR1AWVvRymd6yHnVmRV5Q",authDomain:"austin-tennis.firebaseapp.com",databaseURL:"https://austin-tennis-default-rtdb.firebaseio.com",projectId:"austin-tennis",storageBucket:"austin-tennis.firebasestorage.app",messagingSenderId:"652090047111",appId:"1:652090047111:web:b1795d9f47a70edbaa5622"});
-firebase.auth().signInAnonymously().catch(()=>{});
+let showSignIn=false,signInError="",signInLoading=false,dataLoaded=false;
+firebase.auth().onAuthStateChanged(user=>{showSignIn=!user;if(signInLoading&&user)signInLoading=false;render();});
 const db=firebase.database(),mRef=db.ref("match"),hRef=db.ref("history"),nRef=db.ref("notifications");
 
 const VAPID_KEY="BJQvLm_-T8KLwHZdZQu3aV0_FwKKsmybA4lh8jopn6kMHWOA4dMQfXGQqNXIlvmmZnQQv0jFhRQ0WoF3Ul_H8LM";
@@ -157,7 +158,7 @@ const clientStartTime=Date.now();
 function save(ns){S=ns;mRef.set(ns);render()}
 function snap(){const c=JSON.parse(JSON.stringify(S));delete c.stateHistory;if(!S.stateHistory)S.stateHistory=[];S.stateHistory.push(c);if(S.stateHistory.length>200)S.stateHistory.shift()}
 
-mRef.on("value",s=>{const v=s.val();if(v){S=v;if(!S.sets)S.sets=[{games:[0,0],tiebreak:false,tiebreakPoints:[0,0]}];if(!S.pointLog)S.pointLog=[];if(!S.stateHistory)S.stateHistory=[];if(S.matchStarted)showSetup=false}document.getElementById("loading").classList.add("hidden");startTimer();render()});
+mRef.on("value",s=>{dataLoaded=true;const v=s.val();if(v){S=v;if(!S.sets)S.sets=[{games:[0,0],tiebreak:false,tiebreakPoints:[0,0]}];if(!S.pointLog)S.pointLog=[];if(!S.stateHistory)S.stateHistory=[];if(S.matchStarted)showSetup=false}startTimer();render()});
 hRef.on("value",s=>{const v=s.val();if(v){hKeys=Object.keys(v);const entries=Object.entries(v).map(([k,val])=>({_key:k,...val}));mHist=entries.sort((a,b)=>(b.date||"").localeCompare(a.date||""))}else{hKeys=[];mHist=[]}render()});
 nRef.orderByChild("ts").limitToLast(5).on("child_added",snap=>{const v=snap.val();if(!v||!v.ts)return;if(new Date(v.ts).getTime()<clientStartTime-2000)return;dispNotif(v)});
 
@@ -171,7 +172,7 @@ function scorerActive(){if(!S.activeScorer||!S.scorerHeartbeat)return false;retu
 function isMe(){return S.scorerId===myId}
 
 function startHB(){clearInterval(hbTimer);if(!isAdmin)return;const beat=()=>{S.activeScorer=scorerName||"Scorer";S.scorerHeartbeat=new Date().toISOString();S.scorerId=myId;mRef.update({activeScorer:S.activeScorer,scorerHeartbeat:S.scorerHeartbeat,scorerId:S.scorerId})};beat();hbTimer=setInterval(beat,HB_INT)}
-function stopHB(){clearInterval(hbTimer);mRef.update({activeScorer:null,scorerHeartbeat:null,scorerId:null});firebase.auth().signOut().then(()=>firebase.auth().signInAnonymously()).catch(()=>{})}
+function stopHB(){clearInterval(hbTimer);mRef.update({activeScorer:null,scorerHeartbeat:null,scorerId:null});}
 
 function bsp(pi){if(S.matchOver)return;if(tagsEnabled){pendingPoint={player:pi};render();return}dsp(pi,"No tag")}
 function csp(tag){if(!pendingPoint)return;dsp(pendingPoint.player,tag);pendingPoint=null}
@@ -206,6 +207,8 @@ function handleToggle(){
   }else{stopHB();isAdmin=false;render()}
 }
 function enterScorer(name){scorerName=name;isAdmin=true;showNamePrompt=false;showScorerWarn=false;if(!S.matchStarted)showSetup=true;startHB();if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().then(()=>{_tryRegisterFCMToken();render()});else{_tryRegisterFCMToken();render()}}
+async function signInWithGoogle(){signInError="";signInLoading=true;render();try{await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(err){if(err.code!=='auth/popup-closed-by-user')signInError="Google sign-in failed. Please try again.";signInLoading=false;render()}}
+async function signInWithPassword(email,password){signInError="";signInLoading=true;render();try{await firebase.auth().signInWithEmailAndPassword(email,password)}catch(err){signInError=err.code==='auth/wrong-password'||err.code==='auth/user-not-found'||err.code==='auth/invalid-credential'?"Invalid email or password.":"Sign-in failed. Please try again.";signInLoading=false;render()}}
 function startMatch(){S.matchStarted=true;S.lastUpdated=new Date().toISOString();S.matchStartTime=new Date().toISOString();S.pointLog=[];S.stateHistory=[];showSetup=false;save(S)}
 function doReset(){const f=JSON.parse(JSON.stringify(DEF));f.player1=S.player1;f.player2=S.player2;f.matchFormat=S.matchFormat;f.gamesPerSet=S.gamesPerSet;f.thirdSetFormat=S.thirdSetFormat;f.noAd=S.noAd;f.activeScorer=S.activeScorer;f.scorerHeartbeat=S.scorerHeartbeat;f.scorerId=S.scorerId;showSetup=true;confirmReset=false;confirmFinalize=false;save(f)}
 function doFinalize(){if(!S.matchOver)return;hRef.push({player1:S.player1,player2:S.player2,winner:S.winner,sets:S.sets,gamesPerSet:S.gamesPerSet,matchFormat:S.matchFormat,thirdSetFormat:S.thirdSetFormat,noAd:S.noAd,pointLog:S.pointLog||[],date:new Date().toISOString(),matchDuration:getEl(),indoor:S.indoor||false,location:S.location||"",weather:S.weather||null,p1Wtn:S.p1Wtn||"",p2Wtn:S.p2Wtn||""});doReset()}
@@ -316,8 +319,14 @@ function histList(){
     h+=`<div class="hi"><div onclick="viewHist=mHist[${i}];render()" style="cursor:pointer;${isAdmin?'padding-right:70px':''}"><div style="font-size:15px;font-weight:600">${e(m.player1)}${m.p1Wtn?` <span style="font-size:11px;color:var(--ac)">${m.p1Wtn}</span>`:''} vs ${e(m.player2)}${m.p2Wtn?` <span style="font-size:11px;color:var(--blue)">${m.p2Wtn}</span>`:''}</div><div style="font-size:13px;color:var(--ac);margin-top:2px">🏆 ${e(wN)} · ${(m.sets||[]).map(s=>`<span style="font-family:'JetBrains Mono',monospace;margin:0 3px">${s.games[0]}-${s.games[1]}</span>`).join('')}</div><div class="hm">${fd(m.date)} · ${m.noAd?'No-Ad':'Ad'} · ${m.gamesPerSet||6}g${m.matchDuration?' · '+m.matchDuration:''}${mCtx?' · '+mCtx:''}</div></div>${isAdmin?`<button class="db" onclick="event.stopPropagation();delByIdx(${i})">DELETE</button>`:''}</div>`});
   return`<div class="mt22">${h}</div>`}
 
+const GSVG=`<svg width="16" height="16" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 9.5c3.2 0 5.7 1.1 7.6 2.9l5.7-5.7C33.8 3.5 29.3 1.5 24 1.5 14.9 1.5 7.2 7.1 4.1 14.9l6.6 5.1C12.3 14 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.4 5.7C43.7 37.1 46.5 31 46.5 24z"/><path fill="#FBBC05" d="M10.7 28.6c-.5-1.4-.7-2.9-.7-4.6s.2-3.2.7-4.6L4.1 14.4C2.8 17.1 2 20 2 24s.8 6.9 2.1 9.6l6.6-5z"/><path fill="#34A853" d="M24 46.5c5.3 0 9.8-1.8 13-4.8l-7.4-5.7c-1.8 1.2-4.2 1.9-5.6 1.9-6.3 0-11.7-4.5-13.3-10.3l-6.6 5.1C7.2 40.9 14.9 46.5 24 46.5z"/></svg>`;
+
 function render(){
   const app=document.getElementById("app");const n=S.sets.length;const gc=`1fr repeat(${n},44px) 58px`;
+
+  // Auth gate
+  if(showSignIn){app.innerHTML=`${titleHtml()}<div class="card sc"><div style="text-align:center;margin-bottom:24px"><div style="font-size:13px;letter-spacing:3px;color:var(--t3);font-weight:700">SIGN IN TO CONTINUE</div></div><button class="go" style="background:#fff;color:#1a1a1a;letter-spacing:0;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px" onclick="signInWithGoogle()">${GSVG}${signInLoading?'Signing in…':'Sign in with Google'}</button><div style="display:flex;align-items:center;gap:10px;margin:16px 0"><div style="flex:1;height:1px;background:var(--brd)"></div><span style="font-size:10px;color:var(--t3);letter-spacing:2px">OR</span><div style="flex:1;height:1px;background:var(--brd)"></div></div><label class="fl">EMAIL</label><input class="fi" id="si-email" type="email" placeholder="Email" autocomplete="username"><div class="sp"></div><label class="fl">PASSWORD</label><input class="fi" id="si-pass" type="password" placeholder="Password" autocomplete="current-password">${signInError?`<div style="color:var(--red);font-size:13px;margin-top:10px;text-align:center">${e(signInError)}</div>`:''}<button class="go" style="opacity:0.4;pointer-events:none;margin-top:12px" id="si-go" onclick="signInWithPassword(document.getElementById('si-email').value.trim(),document.getElementById('si-pass').value)">SIGN IN</button></div>`;setTimeout(()=>{const em=document.getElementById('si-email'),pw=document.getElementById('si-pass'),btn=document.getElementById('si-go');function chk(){btn.style.opacity=(em.value.trim()&&pw.value)?'1':'0.4';btn.style.pointerEvents=(em.value.trim()&&pw.value)?'auto':'none'}if(em)em.oninput=chk;if(pw)pw.oninput=chk;if(em)em.focus()},0);return}
+  if(!dataLoaded){app.innerHTML=`<div class="tac" style="margin-top:80px"><div style="color:var(--t3);font-size:14px;letter-spacing:3px">LOADING...</div></div>`;return}
 
   // Name prompt
   if(showNamePrompt){app.innerHTML=`${titleHtml()}<div class="card sc"><div style="text-align:center;margin-bottom:20px;font-size:13px;letter-spacing:3px;color:var(--ac);font-weight:700">ENTER SCORER MODE</div><label class="fl">YOUR NAME</label><input class="fi" id="sn-input" value="${e(scorerName)}" placeholder="Enter your name"><button class="go" style="opacity:0.4;pointer-events:none;margin-top:12px" id="sn-go" onclick="enterScorer(document.getElementById('sn-input').value.trim())">CONTINUE</button><button class="sm" style="width:100%;margin-top:12px" onclick="showNamePrompt=false;render()">CANCEL</button></div>`;setTimeout(()=>{const inp=document.getElementById('sn-input'),btn=document.getElementById('sn-go');if(inp){inp.oninput=()=>{const v=inp.value.trim();btn.style.opacity=v?'1':'0.4';btn.style.pointerEvents=v?'auto':'none'};inp.focus()}},0);return}
