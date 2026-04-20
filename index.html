@@ -191,6 +191,7 @@ function fset(ns){const nd=Math.ceil(ns.matchFormat/2);let w=[0,0];ns.sets.forEa
 
 function gs(pi){const c=cs();if(c.tiebreak)return c.tiebreakPoints[pi].toString();const p=S.currentGame[pi],o=S.currentGame[pi===0?1:0];if(p>=3&&o>=3){if(S.noAd)return"40";if(p===o)return"40";return p>o?"AD":"–"}return PL[p]||p.toString()}
 function sw(){const ns=JSON.parse(JSON.stringify(S));ns.serving=ns.serving===0?1:0;ns.lastUpdated=new Date().toISOString();save(ns)}
+function changeMatchFormat(n){if(S.matchFormat===n)return;snap();const ns=JSON.parse(JSON.stringify(S));ns.matchFormat=n;ns.lastUpdated=new Date().toISOString();save(ns)}
 function undo(){if(!S.stateHistory||!S.stateHistory.length)return;const p=S.stateHistory.pop();p.stateHistory=S.stateHistory;save(p)}
 function ft(i){if(!i)return"";return new Date(i).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}
 function fd(i){if(!i)return"";return new Date(i).toLocaleDateString([],{month:"short",day:"numeric",year:"numeric"})}
@@ -333,7 +334,7 @@ function render(){
 
   let adm='';
   if(isAdmin&&!S.matchOver&&S.matchStarted){const cu=S.stateHistory&&S.stateHistory.length>0;
-    adm=`<div class="mt22"><div class="scl">SCORE POINT</div><div class="flex g10"><button class="sb" onclick="bsp(0)">${e(S.player1)}</button><button class="sb" onclick="bsp(1)">${e(S.player2)}</button></div><div class="flex g10 mt10"><button class="sm" onclick="undo()" ${cu?'':'style="opacity:.3;pointer-events:none"'}>↩ UNDO</button><button class="sm b" onclick="sw()">🔄 SERVER</button></div><div class="flex g10 mt10"><button class="sm d" onclick="confirmReset=true;render()">RESET MATCH</button></div><div class="tr"><span class="trl">Point tagging</span><button class="tt ${tagsEnabled?'on':'off'}" onclick="tagsEnabled=!tagsEnabled;render()"><div class="td ${tagsEnabled?'on':'off'}"></div></button></div></div>`}
+    adm=`<div class="mt22"><div class="scl">SCORE POINT</div><div class="flex g10"><button class="sb" onclick="bsp(0)">${e(S.player1)}</button><button class="sb" onclick="bsp(1)">${e(S.player2)}</button></div><div class="flex g10 mt10"><button class="sm" onclick="undo()" ${cu?'':'style="opacity:.3;pointer-events:none"'}>↩ UNDO</button><button class="sm b" onclick="sw()">🔄 SERVER</button></div><div class="flex g10 mt10"><button class="sm d" onclick="confirmReset=true;render()">RESET MATCH</button></div><div class="tr"><span class="trl">Match format</span><div style="display:flex;gap:6px">${[1,3].map(n=>`<button class="pl ${S.matchFormat===n?'a':''}" style="padding:6px 12px;font-size:12px;min-width:0;flex:none" onclick="changeMatchFormat(${n})">${n===1?'Best of 1':'Best of 3'}</button>`).join('')}</div></div><div class="tr"><span class="trl">Point tagging</span><button class="tt ${tagsEnabled?'on':'off'}" onclick="tagsEnabled=!tagsEnabled;render()"><div class="td ${tagsEnabled?'on':'off'}"></div></button></div></div>`}
   else if(isAdmin&&S.matchOver){adm=`<div class="mt22 tac"><button class="go" style="margin-top:0;margin-bottom:10px" onclick="confirmFinalize=true;render()">SAVE & NEW MATCH</button><button class="sm" style="width:100%" onclick="doReset()">NEW MATCH (DON'T SAVE)</button></div>`}
 
   const lastPt=S.pointLog&&S.pointLog.length?S.pointLog[S.pointLog.length-1]:null;
