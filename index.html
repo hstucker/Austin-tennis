@@ -148,10 +148,10 @@ try{const _w=localStorage.getItem('atP1Wtn');if(_w)DEF.p1Wtn=_w}catch(e){}
 let weatherLoading=false,gpsCoords=null;
 const clientStartTime=Date.now();
 
-function save(ns){S=ns;mRef.set(ns);render()}
+function save(ns){S=ns;const fw=JSON.parse(JSON.stringify(ns));delete fw.stateHistory;mRef.set(fw);render()}
 function snap(){const c=JSON.parse(JSON.stringify(S));delete c.stateHistory;if(!S.stateHistory)S.stateHistory=[];S.stateHistory.push(c);if(S.stateHistory.length>200)S.stateHistory.shift()}
 
-mRef.on("value",s=>{const v=s.val();if(v){S=v;if(!S.sets)S.sets=[{games:[0,0],tiebreak:false,tiebreakPoints:[0,0]}];if(!S.pointLog)S.pointLog=[];if(!S.stateHistory)S.stateHistory=[];if(!S.serveState)S.serveState="first";if(S.matchStarted)showSetup=false}document.getElementById("loading").classList.add("hidden");startTimer();render()});
+mRef.on("value",s=>{const v=s.val();if(v){const _hist=S&&S.stateHistory?S.stateHistory:[];S=v;S.stateHistory=_hist;if(!S.sets)S.sets=[{games:[0,0],tiebreak:false,tiebreakPoints:[0,0]}];if(!S.pointLog)S.pointLog=[];if(!S.serveState)S.serveState="first";if(S.matchStarted)showSetup=false}document.getElementById("loading").classList.add("hidden");startTimer();render()});
 hRef.on("value",s=>{const v=s.val();if(v){hKeys=Object.keys(v);const entries=Object.entries(v).map(([k,val])=>({_key:k,...val}));mHist=entries.sort((a,b)=>(b.date||"").localeCompare(a.date||""))}else{hKeys=[];mHist=[]}render()});
 nRef.orderByChild("ts").limitToLast(5).on("child_added",snap=>{const v=snap.val();if(!v||!v.ts)return;if(new Date(v.ts).getTime()<clientStartTime-2000)return;dispNotif(v)});
 
