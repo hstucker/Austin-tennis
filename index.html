@@ -110,7 +110,7 @@ body{background-image:radial-gradient(ellipse 120% 70% at 50% -5%,rgba(212,225,8
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 <script>
 firebase.initializeApp({apiKey:"AIzaSyAP4pLIRiHIXGAR1AWVvRymd6yHnVmRV5Q",authDomain:"austin-tennis.firebaseapp.com",databaseURL:"https://austin-tennis-default-rtdb.firebaseio.com",projectId:"austin-tennis",storageBucket:"austin-tennis.firebasestorage.app",messagingSenderId:"652090047111",appId:"1:652090047111:web:b1795d9f47a70edbaa5622"});
-const db=firebase.database(),mRef=db.ref("match"),hRef=db.ref("history"),nRef=db.ref("notifications");
+const db=firebase.database(),mRef=db.ref("match"),logRef=db.ref("log"),hbRef=db.ref("hb"),hRef=db.ref("history"),nRef=db.ref("notifications");
 
 const VAPID_KEY="BJQvLm_-T8KLwHZdZQu3aV0_FwKKsmybA4lh8jopn6kMHWOA4dMQfXGQqNXIlvmmZnQQv0jFhRQ0WoF3Ul_H8LM";
 let _swReg=null;
@@ -140,7 +140,7 @@ const DEF={player1:"Austin",player2:"Opponent",sets:[{games:[0,0],tiebreak:false
 let S=JSON.parse(JSON.stringify(DEF));
 let isAdmin=false,showSetup=true,confirmReset=false,confirmFinalize=false,confirmDeleteKey=null;
 let pendingPoint=null,viewTab="live",tagsEnabled=true,scorerName="";
-let mHist=[],hKeys=[],viewHist=null,hbTimer=null,timerInt=null,histTab="stats";
+let mHist=[],hKeys=[],viewHist=null,hbTimer=null,timerInt=null,histTab="stats",histFetching=false;
 let showNamePrompt=false,showScorerWarn=false,pendingErrorTag=null,errExpanded=false;
 let notifSettings={game:true,set:true,match:true};
 try{const _ns=localStorage.getItem('atNotif');if(_ns)notifSettings=JSON.parse(_ns)}catch(e){}
@@ -148,11 +148,12 @@ try{const _w=localStorage.getItem('atP1Wtn');if(_w)DEF.p1Wtn=_w}catch(e){}
 let weatherLoading=false,gpsCoords=null;
 const clientStartTime=Date.now();
 
-function save(ns){S=ns;const fw=JSON.parse(JSON.stringify(ns));delete fw.stateHistory;mRef.set(fw);render()}
+function save(ns){S=ns;const fw=JSON.parse(JSON.stringify(ns));delete fw.stateHistory;delete fw.pointLog;mRef.set(fw);logRef.set(ns.pointLog||[]);render()}
 function snap(){const c=JSON.parse(JSON.stringify(S));delete c.stateHistory;if(!S.stateHistory)S.stateHistory=[];S.stateHistory.push(c);if(S.stateHistory.length>200)S.stateHistory.shift()}
 
-mRef.on("value",s=>{const v=s.val();if(v){const _hist=S&&S.stateHistory?S.stateHistory:[];S=v;S.stateHistory=_hist;if(!S.sets)S.sets=[{games:[0,0],tiebreak:false,tiebreakPoints:[0,0]}];if(!S.pointLog)S.pointLog=[];if(!S.serveState)S.serveState="first";if(S.matchStarted)showSetup=false}document.getElementById("loading").classList.add("hidden");startTimer();render()});
-hRef.on("value",s=>{const v=s.val();if(v){hKeys=Object.keys(v);const entries=Object.entries(v).map(([k,val])=>({_key:k,...val}));mHist=entries.sort((a,b)=>(b.date||"").localeCompare(a.date||""))}else{hKeys=[];mHist=[]}render()});
+mRef.on("value",s=>{const v=s.val();if(v){const _h=S&&S.stateHistory||[],_l=S&&S.pointLog||[],_a=S&&S.activeScorer||null,_hb=S&&S.scorerHeartbeat||null,_id=S&&S.scorerId||null;S=v;S.stateHistory=_h;S.pointLog=_l;S.activeScorer=_a;S.scorerHeartbeat=_hb;S.scorerId=_id;if(!S.sets)S.sets=[{games:[0,0],tiebreak:false,tiebreakPoints:[0,0]}];if(!S.pointLog)S.pointLog=[];if(!S.serveState)S.serveState="first";if(S.matchStarted)showSetup=false}document.getElementById("loading").classList.add("hidden");startTimer();render()});
+logRef.on("value",s=>{const v=s.val();S.pointLog=!v?[]:(Array.isArray(v)?v:Object.values(v));render();});
+hbRef.on("value",s=>{const v=s.val()||{};S.activeScorer=v.activeScorer||null;S.scorerHeartbeat=v.scorerHeartbeat||null;S.scorerId=v.scorerId||null;render();});
 nRef.orderByChild("ts").limitToLast(5).on("child_added",snap=>{const v=snap.val();if(!v||!v.ts)return;if(new Date(v.ts).getTime()<clientStartTime-2000)return;dispNotif(v)});
 
 function startTimer(){clearInterval(timerInt);if(S.matchStarted&&!S.matchOver&&S.matchStartTime){timerInt=setInterval(()=>{const el=document.getElementById("mtimer");if(el)el.textContent=getEl()},1000)}}
@@ -164,8 +165,8 @@ function isSTB(n){return n.matchFormat===3&&n.sets.length===3&&n.thirdSetFormat=
 function scorerActive(){if(!S.activeScorer||!S.scorerHeartbeat)return false;return(Date.now()-new Date(S.scorerHeartbeat).getTime())<HB_TO}
 function isMe(){return S.scorerId===myId}
 
-function startHB(){clearInterval(hbTimer);if(!isAdmin)return;const beat=()=>{S.activeScorer=scorerName||"Scorer";S.scorerHeartbeat=new Date().toISOString();S.scorerId=myId;mRef.update({activeScorer:S.activeScorer,scorerHeartbeat:S.scorerHeartbeat,scorerId:S.scorerId})};beat();hbTimer=setInterval(beat,HB_INT)}
-function stopHB(){clearInterval(hbTimer);mRef.update({activeScorer:null,scorerHeartbeat:null,scorerId:null})}
+function startHB(){clearInterval(hbTimer);if(!isAdmin)return;const beat=()=>{const d={activeScorer:scorerName||"Scorer",scorerHeartbeat:new Date().toISOString(),scorerId:myId};S.activeScorer=d.activeScorer;S.scorerHeartbeat=d.scorerHeartbeat;S.scorerId=d.scorerId;hbRef.set(d)};beat();hbTimer=setInterval(beat,HB_INT)}
+function stopHB(){clearInterval(hbTimer);hbRef.remove();S.activeScorer=null;S.scorerHeartbeat=null;S.scorerId=null;}
 
 function bsp(pi){if(S.matchOver)return;if(tagsEnabled){pendingPoint={player:pi};render();return}dsp(pi,"No tag",null)}
 function csp(tag){if(!pendingPoint)return;if(tag==="Unforced error"||tag==="Forced error"){pendingErrorTag=tag;render();return}dsp(pendingPoint.player,tag,null);pendingPoint=null;pendingErrorTag=null}
@@ -211,7 +212,7 @@ function startMatch(){S.matchStarted=true;S.lastUpdated=new Date().toISOString()
 function doReset(){const f=JSON.parse(JSON.stringify(DEF));f.player1=S.player1;f.player2=S.player2;f.matchFormat=S.matchFormat;f.gamesPerSet=S.gamesPerSet;f.thirdSetFormat=S.thirdSetFormat;f.noAd=S.noAd;f.activeScorer=S.activeScorer;f.scorerHeartbeat=S.scorerHeartbeat;f.scorerId=S.scorerId;showSetup=true;confirmReset=false;confirmFinalize=false;save(f)}
 function doFinalize(){if(!S.matchOver)return;hRef.push({player1:S.player1,player2:S.player2,winner:S.winner,sets:S.sets,gamesPerSet:S.gamesPerSet,matchFormat:S.matchFormat,thirdSetFormat:S.thirdSetFormat,noAd:S.noAd,pointLog:S.pointLog||[],date:new Date().toISOString(),matchDuration:getEl(),indoor:S.indoor||false,location:S.location||"",weather:S.weather||null,p1Wtn:S.p1Wtn||"",p2Wtn:S.p2Wtn||""});doReset()}
 function delByIdx(idx){if(!mHist[idx])return;const key=mHist[idx]._key;if(key){confirmDeleteKey=key;render()}}
-function doDel(){if(!confirmDeleteKey)return;hRef.child(confirmDeleteKey).remove();confirmDeleteKey=null;render()}
+function doDel(){if(!confirmDeleteKey)return;hRef.child(confirmDeleteKey).remove();mHist=mHist.filter(m=>m._key!==confirmDeleteKey);confirmDeleteKey=null;render()}
 
 async function exportStats(){const el=document.getElementById("sxa");if(!el)return;try{const c=await html2canvas(el,{backgroundColor:'#0D1520',scale:2});const l=document.createElement('a');l.download='match-stats.png';l.href=c.toDataURL();l.click()}catch(e){alert('Export failed.')}}
 
@@ -257,7 +258,7 @@ async function fetchWeatherFromText(q){
 function scorerBadge(){if(!scorerActive())return'';return`<div class="scb"><span class="scbd"></span>Scored by <strong style="color:var(--ac)">${e(S.activeScorer)}</strong></div>`}
 function modeToggle(){const label=isAdmin?'SWITCH TO VIEWER':'SWITCH TO SCORER';const hint=isAdmin?`Scoring as ${e(scorerName||'Scorer')}`:'Scores update in real-time';return`<div class="mt32 tac"><button class="mt" onclick="handleToggle()">${label}</button><div class="mh">${hint}</div>${!isAdmin?scorerBadge():''}</div>`}
 function titleHtml(){return`<div class="tb"><div class="ts">AUSTIN'S</div><div class="tm">Tennis Scoring App</div><div class="tbar"></div></div>`}
-function tabsHtml(){return`<div class="tabs"><button class="tab ${viewTab==='live'?'a':''}" onclick="viewTab='live';render()">LIVE</button><button class="tab ${viewTab==='pbp'?'a':''}" onclick="viewTab='pbp';render()">PLAY-BY-PLAY</button><button class="tab ${viewTab==='stats'?'a':''}" onclick="viewTab='stats';render()">STATS</button><button class="tab ${viewTab==='history'?'a':''}" onclick="viewTab='history';render()">HISTORY</button><button class="tab ${viewTab==='settings'?'a':''}" onclick="viewTab='settings';render()">⚙️</button></div>`}
+function tabsHtml(){return`<div class="tabs"><button class="tab ${viewTab==='live'?'a':''}" onclick="viewTab='live';render()">LIVE</button><button class="tab ${viewTab==='pbp'?'a':''}" onclick="viewTab='pbp';render()">PLAY-BY-PLAY</button><button class="tab ${viewTab==='stats'?'a':''}" onclick="viewTab='stats';render()">STATS</button><button class="tab ${viewTab==='history'?'a':''}" onclick="viewTab='history';loadHist();render()">HISTORY</button><button class="tab ${viewTab==='settings'?'a':''}" onclick="viewTab='settings';render()">⚙️</button></div>`}
 
 function fmtPtScore(pt){
   if(!pt.gp)return'';
@@ -297,7 +298,10 @@ function settingsHtml(){
   return`<div class="card sc mt22"><div style="font-size:11px;letter-spacing:3px;color:var(--ac);font-weight:700;margin-bottom:20px">NOTIFICATIONS</div><div class="tr"><span class="trl">Permission</span><button onclick="reqNotifPerm()" style="padding:6px 14px;border:1px solid var(--brd-a);border-radius:8px;background:none;font-size:12px;font-weight:700;font-family:'Outfit',sans-serif;cursor:${np==='default'?'pointer':'default'};color:${npClr}">${npTxt}</button></div><div class="tr"><span class="trl">Game alerts</span><button class="tt ${notifSettings.game?'on':'off'}" onclick="notifSettings.game=!notifSettings.game;saveNotifSettings();render()"><div class="td ${notifSettings.game?'on':'off'}"></div></button></div><div class="tr"><span class="trl">Set alerts</span><button class="tt ${notifSettings.set?'on':'off'}" onclick="notifSettings.set=!notifSettings.set;saveNotifSettings();render()"><div class="td ${notifSettings.set?'on':'off'}"></div></button></div><div class="tr"><span class="trl">Match alerts</span><button class="tt ${notifSettings.match?'on':'off'}" onclick="notifSettings.match=!notifSettings.match;saveNotifSettings();render()"><div class="td ${notifSettings.match?'on':'off'}"></div></button></div>${prev}</div>`;
 }
 
+function loadHist(){if(histFetching)return;histFetching=true;hRef.once("value",s=>{histFetching=false;const v=s.val();if(v){hKeys=Object.keys(v);const entries=Object.entries(v).map(([k,val])=>({_key:k,...val}));mHist=entries.sort((a,b)=>(b.date||"").localeCompare(a.date||""))}else{hKeys=[];mHist=[];}render();});}
+
 function histList(){
+  if(histFetching)return`<div class="card mt22" style="padding:24px;text-align:center;color:var(--t3);font-size:14px">Loading history…</div>`;
   if(!mHist.length)return`<div class="card mt22" style="padding:24px;text-align:center;color:var(--t3);font-size:14px">No past matches saved yet.</div>`;
   let h='';mHist.forEach((m,i)=>{const wN=m.winner===0?m.player1:m.player2;
     const mCtx=contextLine(m);
