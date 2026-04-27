@@ -1,0 +1,42 @@
+{
+  "rules": {
+    "match": {
+      ".read": true,
+      ".write": "auth != null && root.child('users').child(auth.uid).child('blocked').val() !== true",
+      ".validate": "newData.hasChildren(['player1','player2','sets','currentGame','serving','matchFormat','gamesPerSet','matchStarted'])"
+    },
+    "history": {
+      ".read": true,
+      "$id": {
+        ".write": "auth != null && root.child('users').child(auth.uid).child('blocked').val() !== true",
+        ".validate": "newData.hasChildren(['player1','player2','sets','winner','date'])"
+      }
+    },
+    "notifications": {
+      ".read": true,
+      "$id": {
+        ".write": "auth != null && !data.exists() && root.child('users').child(auth.uid).child('blocked').val() !== true",
+        ".validate": "newData.hasChildren(['type','title','body','ts'])"
+      }
+    },
+    "fcmTokens": {
+      ".read": "auth != null",
+      "$token": {
+        ".write": true,
+        ".validate": "newData.isBoolean()"
+      }
+    },
+    "users": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'harris.s.tucker2123@gmail.com')",
+        ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'harris.s.tucker2123@gmail.com')"
+      }
+    },
+    "scorerLog": {
+      ".read": "auth != null && auth.token.email === 'harris.s.tucker2123@gmail.com'",
+      "$id": {
+        ".write": "auth != null && !data.exists()"
+      }
+    }
+  }
+}
