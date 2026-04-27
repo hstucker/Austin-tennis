@@ -112,7 +112,6 @@ body{background-image:radial-gradient(ellipse 120% 70% at 50% -5%,rgba(212,225,8
 <script>
 firebase.initializeApp({apiKey:"AIzaSyAP4pLIRiHIXGAR1AWVvRymd6yHnVmRV5Q",authDomain:"austin-tennis.firebaseapp.com",databaseURL:"https://austin-tennis-default-rtdb.firebaseio.com",projectId:"austin-tennis",storageBucket:"austin-tennis.firebasestorage.app",messagingSenderId:"652090047111",appId:"1:652090047111:web:b1795d9f47a70edbaa5622"});
 const db=firebase.database(),mRef=db.ref("match"),logRef=db.ref("log"),hbRef=db.ref("hb"),hRef=db.ref("history"),nRef=db.ref("notifications");
-firebase.auth().getRedirectResult().catch(function(err){if(err&&err.code&&err.code!=='auth/cancelled-popup-request')alert('Sign-in failed: '+err.message);});
 
 const VAPID_KEY="BJQvLm_-T8KLwHZdZQu3aV0_FwKKsmybA4lh8jopn6kMHWOA4dMQfXGQqNXIlvmmZnQQv0jFhRQ0WoF3Ul_H8LM";
 let _swReg=null;
@@ -167,7 +166,6 @@ firebase.auth().onAuthStateChanged(user=>{
   if(user){
     db.ref('users/'+user.uid).update({email:user.email,name:user.displayName||user.email,photoURL:user.photoURL||null,lastSeen:new Date().toISOString()});
     _tryRegisterFCMToken();
-    try{if(localStorage.getItem('_scorerIntent')){localStorage.removeItem('_scorerIntent');enterScorer();return;}}catch(e){}
     if(user.email===ADMIN_EMAIL){
       if(!_usersRef){_usersRef=db.ref('users');_usersRef.on('value',s=>{adminUsers=s.val()||{};render()})}
       if(!_scorerLogRef){_scorerLogRef=db.ref('scorerLog').orderByChild('startTime').limitToLast(50);_scorerLogRef.on('value',s=>{const v=s.val()||{};scorerLogEntries=Object.entries(v).map(([k,val])=>({_key:k,...val})).sort((a,b)=>(b.startTime||'').localeCompare(a.startTime||''));render()})}
@@ -228,8 +226,8 @@ function handleToggle(){
   }else{stopHB();isAdmin=false;render()}
 }
 function _signInAndScore(){
-  if(currentUser){enterScorer()}
-  else{try{localStorage.setItem('_scorerIntent','1')}catch(e){}const p=new firebase.auth.GoogleAuthProvider();firebase.auth().signInWithRedirect(p)}}
+  if(currentUser){enterScorer();}
+  else{const p=new firebase.auth.GoogleAuthProvider();firebase.auth().signInWithPopup(p).then(()=>enterScorer()).catch(err=>{if(err.code!=='auth/popup-closed-by-user')alert('Sign-in failed: '+err.message);});}}
 function enterScorer(){scorerName=currentUser?currentUser.displayName||currentUser.email||'Scorer':'Scorer';isAdmin=true;showNamePrompt=false;showScorerWarn=false;_logScorerStart();if(!S.matchStarted)showSetup=true;startHB();if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().then(()=>{_tryRegisterFCMToken();render()});else{_tryRegisterFCMToken();render()}}
 function _logScorerStart(){if(!currentUser)return;const ref=db.ref('scorerLog').push({scorerUid:currentUser.uid,scorerEmail:currentUser.email,scorerName:currentUser.displayName||currentUser.email,startTime:new Date().toISOString()});scorerLogKey=ref.key}
 function _logScorerEnd(){if(!scorerLogKey)return;db.ref('scorerLog/'+scorerLogKey).update({endTime:new Date().toISOString()});scorerLogKey=null}
