@@ -135,6 +135,7 @@ const PL=["0","15","30","40"],TAGS=["Ace","Unreturned serve","Double fault","FH 
 const TC={"Ace":"ace","Unreturned serve":"ace","Double fault":"df","FH winner":"wn","BH winner":"wn","Dropshot winner":"wn","Volley winner":"wn","Overhead winner":"wn","Unforced error":"er","Forced error":"er","No tag":"sk"};
 const HB_INT=10000,HB_TO=35000;
 const myId="s_"+Math.random().toString(36).slice(2,10);
+const sessRef=db.ref('sessions/'+myId);
 
 const DEF={player1:"Austin",player2:"Opponent",sets:[{games:[0,0],tiebreak:false,tiebreakPoints:[0,0]}],currentGame:[0,0],serving:0,matchFormat:3,gamesPerSet:6,thirdSetFormat:"regular",noAd:false,matchOver:false,winner:null,lastUpdated:null,matchStarted:false,matchStartTime:null,pointLog:[],stateHistory:[],activeScorer:null,scorerHeartbeat:null,scorerId:null,indoor:false,location:"",weather:null,p1Wtn:"",p2Wtn:"",serveState:"first"};
 
@@ -151,7 +152,8 @@ const clientStartTime=Date.now();
 let currentUser=null;
 const ADMIN_EMAIL='harris.s.tucker2123@gmail.com';
 let adminUsers={},scorerLogEntries=[],scorerLogKey=null;
-let _usersRef=null,_scorerLogRef=null;
+let activeSessions={};
+let _usersRef=null,_scorerLogRef=null,_sessionsRef=null;
 
 function save(ns){S=ns;const fw=JSON.parse(JSON.stringify(ns));delete fw.stateHistory;delete fw.pointLog;mRef.set(fw);logRef.set(ns.pointLog||[]);render()}
 function snap(){const c=JSON.parse(JSON.stringify(S));delete c.stateHistory;if(!S.stateHistory)S.stateHistory=[];S.stateHistory.push(c);if(S.stateHistory.length>200)S.stateHistory.shift()}
@@ -159,16 +161,19 @@ function snap(){const c=JSON.parse(JSON.stringify(S));delete c.stateHistory;if(!
 mRef.on("value",s=>{const v=s.val();if(v){const _h=S&&S.stateHistory||[],_l=S&&S.pointLog||[],_a=S&&S.activeScorer||null,_hb=S&&S.scorerHeartbeat||null,_id=S&&S.scorerId||null;S=v;S.stateHistory=_h;S.pointLog=_l;S.activeScorer=_a;S.scorerHeartbeat=_hb;S.scorerId=_id;if(!S.sets)S.sets=[{games:[0,0],tiebreak:false,tiebreakPoints:[0,0]}];if(!S.pointLog)S.pointLog=[];if(!S.serveState)S.serveState="first";if(S.matchStarted)showSetup=false}document.getElementById("loading").classList.add("hidden");startTimer();render()});
 logRef.on("value",s=>{const v=s.val();S.pointLog=!v?[]:(Array.isArray(v)?v:Object.values(v));render();});
 hbRef.on("value",s=>{const v=s.val()||{};S.activeScorer=v.activeScorer||null;S.scorerHeartbeat=v.scorerHeartbeat||null;S.scorerId=v.scorerId||null;render();});
+db.ref('.info/connected').on('value',s=>{if(!s.val())return;sessRef.onDisconnect().remove();_upsertSession();});
 nRef.orderByChild("ts").limitToLast(5).on("child_added",snap=>{const v=snap.val();if(!v||!v.ts)return;if(new Date(v.ts).getTime()<clientStartTime-2000)return;dispNotif(v)});
 
 firebase.auth().onAuthStateChanged(user=>{
   currentUser=user;
+  _upsertSession();
   if(user){
     db.ref('users/'+user.uid).update({email:user.email,name:user.displayName||user.email,photoURL:user.photoURL||null,lastSeen:new Date().toISOString()});
     _tryRegisterFCMToken();
     if(user.email===ADMIN_EMAIL){
       if(!_usersRef){_usersRef=db.ref('users');_usersRef.on('value',s=>{adminUsers=s.val()||{};render()})}
       if(!_scorerLogRef){_scorerLogRef=db.ref('scorerLog').orderByChild('startTime').limitToLast(50);_scorerLogRef.on('value',s=>{const v=s.val()||{};scorerLogEntries=Object.entries(v).map(([k,val])=>({_key:k,...val})).sort((a,b)=>(b.startTime||'').localeCompare(a.startTime||''));render()})}
+      if(!_sessionsRef){_sessionsRef=db.ref('sessions');_sessionsRef.on('value',s=>{activeSessions=s.val()||{};render()})}
     }
   }
   render();
@@ -183,6 +188,7 @@ function isSTB(n){return n.matchFormat===3&&n.sets.length===3&&n.thirdSetFormat=
 function scorerActive(){if(!S.activeScorer||!S.scorerHeartbeat)return false;return(Date.now()-new Date(S.scorerHeartbeat).getTime())<HB_TO}
 function isMe(){return S.scorerId===myId}
 
+function _upsertSession(){sessRef.set({name:currentUser?(currentUser.displayName||currentUser.email||'User'):'Viewer',email:currentUser?currentUser.email:null,role:isAdmin?'scorer':'viewer',lastSeen:new Date().toISOString()})}
 function startHB(){clearInterval(hbTimer);if(!isAdmin)return;const beat=()=>{const d={activeScorer:scorerName||"Scorer",scorerHeartbeat:new Date().toISOString(),scorerId:myId};S.activeScorer=d.activeScorer;S.scorerHeartbeat=d.scorerHeartbeat;S.scorerId=d.scorerId;hbRef.set(d)};beat();hbTimer=setInterval(beat,HB_INT)}
 function stopHB(){clearInterval(hbTimer);_logScorerEnd();hbRef.remove();S.activeScorer=null;S.scorerHeartbeat=null;S.scorerId=null;}
 
@@ -228,7 +234,7 @@ function handleToggle(){
 function _signInAndScore(){
   if(currentUser){enterScorer();}
   else{const p=new firebase.auth.GoogleAuthProvider();firebase.auth().signInWithPopup(p).then(()=>enterScorer()).catch(err=>{if(err.code!=='auth/popup-closed-by-user')alert('Sign-in failed: '+err.message);});}}
-function enterScorer(){scorerName=currentUser?currentUser.displayName||currentUser.email||'Scorer':'Scorer';isAdmin=true;showNamePrompt=false;showScorerWarn=false;_logScorerStart();if(!S.matchStarted)showSetup=true;startHB();if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().then(()=>{_tryRegisterFCMToken();render()});else{_tryRegisterFCMToken();render()}}
+function enterScorer(){scorerName=currentUser?currentUser.displayName||currentUser.email||'Scorer':'Scorer';isAdmin=true;_upsertSession();showNamePrompt=false;showScorerWarn=false;_logScorerStart();if(!S.matchStarted)showSetup=true;startHB();if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().then(()=>{_tryRegisterFCMToken();render()});else{_tryRegisterFCMToken();render()}}
 function _logScorerStart(){if(!currentUser)return;const ref=db.ref('scorerLog').push({scorerUid:currentUser.uid,scorerEmail:currentUser.email,scorerName:currentUser.displayName||currentUser.email,startTime:new Date().toISOString()});scorerLogKey=ref.key}
 function _logScorerEnd(){if(!scorerLogKey)return;db.ref('scorerLog/'+scorerLogKey).update({endTime:new Date().toISOString()});scorerLogKey=null}
 function startMatch(){S.matchStarted=true;S.lastUpdated=new Date().toISOString();S.matchStartTime=new Date().toISOString();S.pointLog=[];S.stateHistory=[];showSetup=false;save(S)}
@@ -323,12 +329,22 @@ function settingsHtml(){
 }
 
 function adminHtml(){
-  const logRows=scorerLogEntries.length?scorerLogEntries.map(en=>`<div class="hi"><div><div style="font-size:14px;font-weight:600">${e(en.scorerName)}</div><div style="font-size:11px;color:var(--t3)">${e(en.scorerEmail)}</div><div style="font-size:11px;color:var(--t3)">${fd(en.startTime)}${en.endTime?' → ended '+ft(en.endTime):'<span style="color:#66BB6A"> · active</span>'}</div></div></div>`).join(''):'<div style="color:var(--t3);text-align:center;padding:16px">No scorer activity yet.</div>';
+  const sessEntries=Object.entries(activeSessions).sort((a,b)=>(b[1].lastSeen||'').localeCompare(a[1].lastSeen||''));
+  const sessRows=sessEntries.length?sessEntries.map(([sid,s])=>{const isMe=sid===myId;return`<div class="hi"><div style="font-size:14px;font-weight:600">${e(s.name||'Viewer')}${isMe?' <span style="font-size:10px;color:var(--t3)">(you)</span>':''}</div>${s.email?`<div style="font-size:11px;color:var(--t3)">${e(s.email)}</div>`:''}<div style="font-size:11px;margin-top:3px"><span style="color:${s.role==='scorer'?'#66BB6A':'var(--t2)'}">${s.role==='scorer'?'● SCORER':'● viewer'}</span><span style="color:var(--t3)"> · ${ft(s.lastSeen)}</span></div></div>`;}).join(''):'<div style="color:var(--t3);text-align:center;padding:16px">No active sessions.</div>';
+  const liveScorer=scorerActive()?S.activeScorer:null;
+  let activeFlagged=false;
+  const logRows=scorerLogEntries.length?scorerLogEntries.map(en=>{
+    let statusHtml;
+    if(en.endTime){statusHtml=' → ended '+ft(en.endTime);}
+    else if(!activeFlagged&&liveScorer&&en.scorerName===liveScorer){activeFlagged=true;statusHtml='<span style="color:#66BB6A"> · active</span>';}
+    else{statusHtml=' <span style="font-size:10px;color:var(--t3)">· session ended</span>';}
+    return`<div class="hi"><div><div style="font-size:14px;font-weight:600">${e(en.scorerName)}</div><div style="font-size:11px;color:var(--t3)">${e(en.scorerEmail)}</div><div style="font-size:11px;color:var(--t3)">${fd(en.startTime)}${statusHtml}</div></div></div>`;
+  }).join(''):'<div style="color:var(--t3);text-align:center;padding:16px">No scorer activity yet.</div>';
   const userRows=Object.entries(adminUsers).map(([uid,u])=>`<div class="hi" style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:14px;font-weight:600">${e(u.name||u.email)}</div><div style="font-size:11px;color:var(--t3)">${e(u.email)}</div><div style="font-size:11px;color:var(--t3)">Last seen: ${fd(u.lastSeen)}</div>${u.blocked?'<div style="font-size:11px;color:#ef5350;font-weight:700;margin-top:2px">BLOCKED</div>':''}</div>${uid!==currentUser.uid?`<button class="sm" onclick="toggleBlock('${uid}',${!u.blocked})">${u.blocked?'UNBLOCK':'BLOCK'}</button>`:''}</div>`).join('')||'<div style="color:var(--t3);text-align:center;padding:16px">No users yet.</div>';
-  return`<div class="card mt22" style="margin-bottom:16px"><div style="font-size:11px;letter-spacing:3px;color:var(--ac);font-weight:700;margin-bottom:14px">SCORER LOG</div>${logRows}</div><div class="card mt22"><div style="font-size:11px;letter-spacing:3px;color:var(--ac);font-weight:700;margin-bottom:14px">USERS</div>${userRows}</div>`;
+  return`<div class="card mt22" style="margin-bottom:16px;padding:20px"><div style="font-size:11px;letter-spacing:3px;color:var(--ac);font-weight:700;margin-bottom:14px">ACTIVE SESSIONS</div>${sessRows}</div><div class="card mt22" style="margin-bottom:16px;padding:20px"><div style="font-size:11px;letter-spacing:3px;color:var(--ac);font-weight:700;margin-bottom:14px">SCORER LOG</div>${logRows}</div><div class="card mt22" style="padding:20px"><div style="font-size:11px;letter-spacing:3px;color:var(--ac);font-weight:700;margin-bottom:14px">USERS</div>${userRows}</div>`;
 }
 function toggleBlock(uid,blocked){db.ref('users/'+uid).update({blocked:blocked})}
-function signOut(){if(isAdmin){stopHB();isAdmin=false;}firebase.auth().signOut()}
+function signOut(){if(isAdmin){stopHB();isAdmin=false;_upsertSession();}firebase.auth().signOut()}
 function loadHist(){if(histFetching)return;histFetching=true;hRef.once("value",s=>{histFetching=false;const v=s.val();if(v){hKeys=Object.keys(v);const entries=Object.entries(v).map(([k,val])=>({_key:k,...val}));mHist=entries.sort((a,b)=>(b.date||"").localeCompare(a.date||""))}else{hKeys=[];mHist=[];}render();});}
 
 function histList(){

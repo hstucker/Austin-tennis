@@ -37,6 +37,16 @@
       "$id": {
         ".write": "auth != null && !data.exists()"
       }
+    },
+    "hb": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "sessions": {
+      ".read": "auth != null && auth.token.email === 'harris.s.tucker2123@gmail.com'",
+      "$sessionId": {
+        ".write": true
+      }
     }
   }
 }
