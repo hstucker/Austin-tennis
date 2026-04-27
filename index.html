@@ -111,6 +111,7 @@ body{background-image:radial-gradient(ellipse 120% 70% at 50% -5%,rgba(212,225,8
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script>
 firebase.initializeApp({apiKey:"AIzaSyAP4pLIRiHIXGAR1AWVvRymd6yHnVmRV5Q",authDomain:"austin-tennis.firebaseapp.com",databaseURL:"https://austin-tennis-default-rtdb.firebaseio.com",projectId:"austin-tennis",storageBucket:"austin-tennis.firebasestorage.app",messagingSenderId:"652090047111",appId:"1:652090047111:web:b1795d9f47a70edbaa5622"});
+firebase.auth().getRedirectResult().then(r=>{if(r&&r.user)enterScorer()}).catch(err=>{if(err.message)alert('Sign-in failed: '+err.message)});
 const db=firebase.database(),mRef=db.ref("match"),logRef=db.ref("log"),hbRef=db.ref("hb"),hRef=db.ref("history"),nRef=db.ref("notifications");
 
 const VAPID_KEY="BJQvLm_-T8KLwHZdZQu3aV0_FwKKsmybA4lh8jopn6kMHWOA4dMQfXGQqNXIlvmmZnQQv0jFhRQ0WoF3Ul_H8LM";
@@ -227,7 +228,7 @@ function handleToggle(){
 }
 function _signInAndScore(){
   if(currentUser){enterScorer()}
-  else{const p=new firebase.auth.GoogleAuthProvider();firebase.auth().signInWithPopup(p).then(()=>enterScorer()).catch(err=>{if(err.code!=='auth/popup-closed-by-user')alert('Sign-in failed: '+err.message)})}
+  else{const p=new firebase.auth.GoogleAuthProvider();firebase.auth().signInWithRedirect(p)}}
 }
 function enterScorer(){scorerName=currentUser?currentUser.displayName||currentUser.email||'Scorer':'Scorer';isAdmin=true;showNamePrompt=false;showScorerWarn=false;_logScorerStart();if(!S.matchStarted)showSetup=true;startHB();if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().then(()=>{_tryRegisterFCMToken();render()});else{_tryRegisterFCMToken();render()}}
 function _logScorerStart(){if(!currentUser)return;const ref=db.ref('scorerLog').push({scorerUid:currentUser.uid,scorerEmail:currentUser.email,scorerName:currentUser.displayName||currentUser.email,startTime:new Date().toISOString()});scorerLogKey=ref.key}
