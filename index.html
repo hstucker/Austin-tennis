@@ -112,6 +112,7 @@ body{background-image:radial-gradient(ellipse 120% 70% at 50% -5%,rgba(212,225,8
 <script>
 firebase.initializeApp({apiKey:"AIzaSyAP4pLIRiHIXGAR1AWVvRymd6yHnVmRV5Q",authDomain:"austin-tennis.firebaseapp.com",databaseURL:"https://austin-tennis-default-rtdb.firebaseio.com",projectId:"austin-tennis",storageBucket:"austin-tennis.firebasestorage.app",messagingSenderId:"652090047111",appId:"1:652090047111:web:b1795d9f47a70edbaa5622"});
 const db=firebase.database(),mRef=db.ref("match"),logRef=db.ref("log"),hbRef=db.ref("hb"),hRef=db.ref("history"),nRef=db.ref("notifications");
+firebase.auth().getRedirectResult().catch(function(err){if(err&&err.code&&err.code!=='auth/cancelled-popup-request')alert('Sign-in failed: '+err.message);});
 
 const VAPID_KEY="BJQvLm_-T8KLwHZdZQu3aV0_FwKKsmybA4lh8jopn6kMHWOA4dMQfXGQqNXIlvmmZnQQv0jFhRQ0WoF3Ul_H8LM";
 let _swReg=null;
