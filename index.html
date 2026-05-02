@@ -364,7 +364,7 @@ function render(){
   for(let pi=0;pi<2;pi++){const isW=S.matchOver&&S.winner===pi,isSrv=S.serving===pi&&!S.matchOver,nm=pi===0?S.player1:S.player2;
     let sets='';for(let i=0;i<n;i++){const s=S.sets[i];const won=csw(s,S.gamesPerSet)===pi;const isCur=i===n-1&&!S.matchOver;const cl=won?'won':isCur?'cur':'';
       if(i===2&&S.thirdSetFormat==="supertb"&&s.tiebreak){sets+=`<div class="ss ${cl}">${s.tiebreakPoints[pi]}</div>`;continue}
-      let sup='';if(s.tiebreak&&csw(s,S.gamesPerSet)>=0){const li=pi===csw(s,S.gamesPerSet)?(pi===0?1:0):pi;sup=`<sup>${s.tiebreakPoints[li]}</sup>`}
+      let sup='';if(s.tiebreak&&csw(s,S.gamesPerSet)>=0){sup=`<sup>${s.tiebreakPoints[pi]}</sup>`}
       sets+=`<div class="ss ${cl}">${s.games[pi]}${sup}</div>`}
     const pd=S.matchOver||stb?'':gs(pi);const po=S.matchOver||stb?'opacity:0':'';
     rows+=`<div class="sr ${isW?'w':''}" style="grid-template-columns:${gc}"><div class="pn ${isW?'pw':''}">${isSrv?SVB:''}<span>${e(nm)}</span>${isW?'<span style="margin-left:8px;font-size:14px">🏆</span>':''}</div>${sets}<div class="pc" style="${po}">${pd}</div></div>`}
