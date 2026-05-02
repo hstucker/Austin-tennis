@@ -5,6 +5,14 @@
       ".write": "auth != null && root.child('users').child(auth.uid).child('blocked').val() !== true",
       ".validate": "newData.hasChildren(['player1','player2','sets','currentGame','serving','matchFormat','gamesPerSet','matchStarted'])"
     },
+    "log": {
+      ".read": true,
+      ".write": "auth != null && root.child('users').child(auth.uid).child('blocked').val() !== true"
+    },
+    "hb": {
+      ".read": true,
+      ".write": "auth != null && root.child('users').child(auth.uid).child('blocked').val() !== true"
+    },
     "history": {
       ".read": true,
       "$id": {
